@@ -4,8 +4,6 @@ from PyQt6.QtWidgets import (
     QLabel,
     QLineEdit,
     QGridLayout,
-    QButtonGroup,
-    QRadioButton,
     QVBoxLayout,
 )
 from PyQt6.QtCore import Qt
@@ -15,7 +13,8 @@ from SecondaryButton import SecondaryButton
 from PyQt6 import QtCore
 from PyQt6 import QtCore
 from PyQt6.QtGui import QFontDatabase
-
+from QuitDialog import QuitDialog
+from GameScreen import GameScreen
 from styles import colors
 
 
@@ -83,8 +82,8 @@ class StartScreen(QMainWindow):
         )
 
         # two primary buttons one to start game and the other to quit
-        submit_button = PrimaryButton("Start Game", lambda x: x + 1)
-        quit_button = SecondaryButton("Quit Game", lambda x: x + 1)
+        submit_button = PrimaryButton("Start Game", self.show_game_screen)
+        quit_button = SecondaryButton("Quit Game", self.show_quit_confirmation)
 
         # Add widgets to the layout
         main_grid_layout.addWidget(main_logo_widget, 0, 0, 6, 5)
@@ -94,6 +93,58 @@ class StartScreen(QMainWindow):
         main_grid_layout.addWidget(self.player2_name, 7, 1, 1, 4)
         main_grid_layout.addWidget(submit_button, 8, 0, 1, 5)
         main_grid_layout.addWidget(quit_button, 9, 0, 1, 5)
+
+    def show_game_screen(self):
+        player1 = self.player1_name.text()  # get the names of the two players
+        player2 = self.player2_name.text()
+
+        # validate the names and produce an error message
+        player1_valid, error_msg1 = self.validate_player_name(player1)
+        player2_valid, error_msg2 = self.validate_player_name(player2)
+
+        if player1_valid and player2_valid:
+            self.game_screen = GameScreen(
+                player1, player2
+            )  # we create a new game screen with the player names and the mode
+            self.game_screen.back_to_start_signal.connect(
+                self.show_start_screen
+            )  # this is a custom signal fromt he game screen that opens the startscreen again withtou using circular imports
+            self.game_screen.show()  # show the game screen
+            self.close()  # close the start screen
+        else:
+            if not player1_valid:  # is any name is not valid
+                self.player1_name.clear()  # we clear that input
+                self.player1_name.setPlaceholderText(
+                    error_msg1
+                )  # and show the error message as place holder text
+            if not player2_valid:
+                self.player2_name.clear()
+                self.player2_name.setPlaceholderText(error_msg2)
+
+    def show_start_screen(self):
+        self.player1_name.clear()  # we clear the inputs
+        self.player2_name.clear()
+        self.game_screen.close()  # close the game screen
+        self.show()  # and re open the start screen
+
+    def show_quit_confirmation(self):
+        dialog = QuitDialog()  # show the confirm quit dialog
+        dialog.exec()
+
+    def validate_player_name(self, name):
+        # Minimum and maximum length check
+        if len(name) < 1:
+            return False, "Name must be longer"
+
+        if len(name) > 10:
+            return False, "Name must be shorter"
+
+        # onyl alphanumeric and spaces allowed
+        if not name.isalnum() or not name.replace(" ", "").isalnum():
+            return False, "Name must be alphanumeric"
+
+        # else
+        return True, ""
 
 
 def get_tan_nimbus():  # gets the font used for tehe logo of the app
