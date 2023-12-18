@@ -1,0 +1,205 @@
+from PyQt6.QtWidgets import (
+    QVBoxLayout,
+    QWidget,
+    QLabel,
+    QLineEdit,
+    QGridLayout,
+    QSpacerItem,
+    QSizePolicy,
+)
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6 import QtCore
+from PyQt6.QtGui import QFont, QFontDatabase
+from PrimaryButton import PrimaryButton
+from SecondaryButton import SecondaryButton
+from styles import colors
+
+# from WarningButton import WarningButton
+# from GameEndDialogue import GameEndDialog
+# from SkipTurnDialog import SkipTurnDialog
+# from CorrectGuessDialog import CorrectGuessDialog
+import random, csv
+
+
+class SideBar(QWidget):
+    def __init__(
+        self,
+        player_name,
+        kumi,
+        start_scren_callback,
+    ):
+        super().__init__()
+
+        # main components settings
+        main_vbox = QVBoxLayout()  # main vertical layout
+        self.setStyleSheet("QWidget{background-color:#141414;}")
+        self.setLayout(main_vbox)
+        self.setContentsMargins(0, 0, 0, 0)
+        main_vbox.setContentsMargins(20, 30, 20, 0)
+        main_vbox.setSpacing(20)
+        self.setMaximumWidth(280)
+
+        # initialise the fonts
+        statliches = self.get_statliches_font()
+        statliches_heading1 = QFont(statliches, 35)  # minimalist display font
+        statliches_heading2 = QFont(statliches, 25)
+        statliches_heading3 = QFont(statliches, 20)
+        statliches_body = QFont(statliches, 16)
+        font_color_white = f"color:{colors['white']}"
+        align_left = Qt.AlignmentFlag.AlignLeft
+        align_right = Qt.AlignmentFlag.AlignRight
+
+        # game variables
+        self.kumi = kumi
+        self.player_name = str(player_name).upper()
+        self.total = 0
+
+        self.timer = QTimer()  # to time the rounds
+        self.timer.timeout.connect(
+            self.empty
+        )  # after every 1 second(which is the timeout for this one) we update the timer label
+        self.start_scren_callback = (
+            start_scren_callback  # function that brigns the start screen back up
+        )
+
+        player_box = QWidget()
+
+        # layout for the turn_tox
+        player_box_grid = QGridLayout()
+        player_box.setLayout(player_box_grid)
+        player_box.setObjectName("player_box")
+        player_box.setStyleSheet(
+            "QWidget#player_box {border: 1px solid #171717; border-radius:10px; background-color:#262626;} QLabel {background-color:#262626;}"
+        )
+
+        # indicates which player's turn it is to draw
+        self.player_label = QLabel(self.player_name)
+        self.player_label.setFont(statliches_heading1)
+        self.player_label.setAlignment(align_left)
+        self.player_label.setStyleSheet(f"color:{colors['yellow']}")
+
+        color_label = QLabel("White" if self.kumi else "Black")
+        color_label.setFont(statliches_heading2)
+        color_label.setStyleSheet(font_color_white)
+        color_label.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignCenter
+        )
+
+        # shows the time remaining and is being updated by the QTimer
+        self.timer_label = QLabel("02 : 00")
+        self.timer_label.setFont(statliches_heading2)
+        self.timer_label.setAlignment(align_right if self.kumi else align_left)
+
+        # add everything to the turnbox vertical layout
+        player_box_grid.addWidget(self.player_label, 0, 0, 1, 1)
+        player_box_grid.addWidget(color_label, 0, 1, 1, 1)
+        player_box_grid.addWidget(self.timer_label, 1, 0, 1, 2)
+
+        # the box with the scores
+        score_box = QWidget()
+
+        # set up the layout for the score box
+        score_grid = QGridLayout()
+        score_box.setLayout(score_grid)
+        score_box.setContentsMargins(0, 0, 0, 20)
+
+        # score heading
+        total_label = QLabel("SCORE : 0")
+        total_label.setFont(statliches_heading1)
+        total_label.setAlignment(align_right if self.kumi else align_left)
+        total_label.setStyleSheet(font_color_white)
+        total_label.setContentsMargins(0, 5, 0, 10)
+
+        # player 1's name
+        territory_label = QLabel("Territory")
+        territory_label.setFont(statliches_heading3)
+        territory_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        territory_label.setStyleSheet(font_color_white)
+
+        # player 1's score
+        self.territory_value = QLabel(str(self.total))
+        self.territory_value.setFont(statliches_heading3)
+        self.territory_value.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.territory_value.setStyleSheet(font_color_white)
+
+        # pieces captures label
+        captured_label = QLabel("Captured")
+        captured_label.setFont(statliches_heading3)
+        captured_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        captured_label.setStyleSheet(font_color_white)
+        # player 2's score
+        self.captured_value = QLabel(str())
+        self.captured_value.setFont(statliches_heading3)
+        self.captured_value.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.captured_value.setStyleSheet(font_color_white)
+
+        # kumi
+        kumi_label = QLabel("Captured")
+        kumi_label.setFont(statliches_heading3)
+        kumi_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        kumi_label.setStyleSheet(font_color_white)
+
+        # kumi score addition if applicable
+        self.kumi_value = QLabel(str())
+        self.kumi_value.setFont(statliches_heading3)
+        self.kumi_value.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.kumi_value.setStyleSheet(font_color_white)
+
+        # add all the widgets created above to the score_grid layout
+        if self.kumi:
+            score_grid.addWidget(total_label, 0, 0, 1, 5)
+            score_grid.addWidget(territory_label, 1, 2, 1, 1)
+            score_grid.addWidget(self.territory_value, 1, 4, 1, 1)
+            score_grid.addWidget(captured_label, 2, 2, 1, 1)
+            score_grid.addWidget(self.captured_value, 2, 4, 1, 1)
+            score_grid.addWidget(kumi_label, 3, 2, 1, 1)
+            score_grid.addWidget(self.kumi_value, 3, 4, 1, 1)
+        else:
+            score_grid.addWidget(total_label, 0, 0, 1, 5)
+            score_grid.addWidget(territory_label, 1, 0, 1, 1)
+            score_grid.addWidget(self.territory_value, 1, 2, 1, 1)
+            score_grid.addWidget(captured_label, 2, 0, 1, 1)
+            score_grid.addWidget(self.captured_value, 2, 2, 1, 1)
+            score_grid.addWidget(kumi_label, 3, 0, 1, 1)
+            score_grid.addWidget(self.kumi_value, 3, 2, 1, 1)
+
+        spacer = (
+            QSpacerItem(  # spacer between the last row of 2 buttons and everything else
+                20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
+            )
+        )
+
+        # adds the three boxes to the main widget
+        main_vbox.addWidget(player_box)
+        main_vbox.addWidget(score_box)
+        main_vbox.addItem(spacer)
+
+    def get_press2p_font(self):
+        font_path = QtCore.QDir.currentPath() + "/fonts/press.ttf"
+        font_id = QFontDatabase.addApplicationFont(font_path)  # load font
+        # Check if the font was loaded successfully
+        if font_id != -1:
+            return QFontDatabase.applicationFontFamilies(font_id)[0]
+        else:
+            return "Helvetica"  # fallback
+
+    def get_josefin(self):
+        font_path = QtCore.QDir.currentPath() + "/fonts/josefin.ttf"
+        font_id = QFontDatabase.addApplicationFont(font_path)  # lond font
+        # Check if the font was loaded successfully
+        if font_id != -1:
+            return QFontDatabase.applicationFontFamilies(font_id)[0]
+        else:
+            return "Helvetica"  # fallback
+
+    def get_statliches_font(self):
+        font_path = QtCore.QDir.currentPath() + "/fonts/statliches.ttf"
+        font_id = QFontDatabase.addApplicationFont(font_path)  # load font
+        # Check if the font was loaded successfully
+        if font_id != -1:
+            return QFontDatabase.applicationFontFamilies(font_id)[0]
+        else:
+            return "Helvetica"  # fallback
+
+    def empty(self):
+        pass
