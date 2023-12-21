@@ -7,6 +7,7 @@ from SideBar import SideBar
 from QuitDialog import QuitDialog
 from board import Board
 from PrimaryButton import PrimaryButton
+import math
 
 # from DrawingArea import DrawingArea
 
@@ -19,6 +20,11 @@ class GameScreen(QMainWindow):
 
     def __init__(self, player1, player2):
         super().__init__()
+
+        self.player1 = player1
+        self.player2 = player2
+        self.currentPlayer = self.player1
+        self.isGameRunning = True
 
         # set window appearance
         self.setWindowTitle("Go")
