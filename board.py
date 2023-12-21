@@ -127,7 +127,7 @@ class Board(QFrame):  # base the board on a QFrame widget
             for col in range(0, len(self.boardArray[0])):
                 painter.save()
                 painter.translate(col * self.squareWidth(), row * self.squareHeight())
-                # TODO draw some pieces as ellipses
+                # TODO - DONE draw some pieces as ellipses,  and set the painter brush to the correct color
                 if self.currentPlayer == self.playerOne:  # Black stone
                     painter.setBrush(QColor(0, 0, 0))  # Set brush color to black
                 else:
@@ -136,8 +136,4 @@ class Board(QFrame):  # base the board on a QFrame widget
                 center = QPoint(radius, radius)
                 painter.drawEllipse(center, radius, radius)
                   
-                # # TODO choose your color and set the painter brush to the correct color
-                # radius = (self.squareWidth() - 2) / 2
-                # center = QPoint(radius, radius)
-                # painter.drawEllipse(center, radius, radius)
-                # painter.restore()
+
