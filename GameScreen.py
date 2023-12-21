@@ -10,7 +10,6 @@ from PrimaryButton import PrimaryButton
 import math
 
 # from DrawingArea import DrawingArea
-
 # from HelpDialog import HelpDialog
 # from AboutDialog import AboutDialog
 
@@ -71,7 +70,7 @@ class GameScreen(QMainWindow):
         button_dock_layout.addWidget(resign_button)
         button_dock_layout.addWidget(pause_button)
 
-        self.board = Board()
+        self.board = Board(self.player1, self.player2, self.currentPlayer)
 
         play_area_layout.addWidget(self.board)
         play_area_layout.addWidget(button_dock)
