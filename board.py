@@ -11,14 +11,18 @@ class Board(QFrame):  # base the board on a QFrame widget
     )  # signal sent when there is a new click location
 
     # TODO set the board width and height to be square
-    boardWidth = 7  # board is 7 squares wide # TODO - DONE this needs updating
-    boardHeight = 7  #
+    boardWidth = 6  # board is 7 squares wide # TODO - DONE this needs updating
+    boardHeight = 6  #
     timerSpeed = 1000  # the timer updates every 1 second
     counter = 10  # the number the counter will count down from
 
-    def __init__(self):
+    def __init__(self, player1, player2, currentPlayer):
         super().__init__()
         self.initBoard()
+        self.player1 = player1
+        self.player2 = player2
+        self.currentPlayer = currentPlayer
+        
 
     def initBoard(self):
         """initiates board"""
@@ -30,17 +34,14 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.start()  # start the game which will start the timer
 
         self.boardArray = (
-            [
-                # 7, 7, 7, 7, 7, 7, 7, 7, 7,
-                # 7, 0, 0, 0, 0, 0, 0, 0, 7, 
-                # 7, 0, 0, 0, 0, 0, 0, 0, 7, 
-                # 7, 0, 0, 0, 0, 0, 0, 0, 7, 
-                # 7, 0, 0, 0, 0, 0, 0, 0, 7, 
-                # 7, 0, 0, 0, 0, 0, 0, 0, 7, 
-                # 7, 0, 0, 0, 0, 0, 0, 0, 7, 
-                # 7, 0, 0, 0, 0, 0, 0, 0, 7, 
-                # 7, 7, 7, 7, 7, 7, 7, 7, 7,
-            ]
+            # [(0 for i in range(7)) for i in range(7)]
+            [0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0],
         )  # TODO - DONE create a 2d int/Piece array to store the state of the game
         self.printBoardArray()  # TODO - DONE uncomment this method after creating the array above
 
@@ -128,11 +129,11 @@ class Board(QFrame):  # base the board on a QFrame widget
                 painter.save()
                 painter.translate(col * self.squareWidth(), row * self.squareHeight())
                 # TODO - DONE draw some pieces as ellipses,  and set the painter brush to the correct color
-                if self.currentPlayer == self.playerOne:  # Black stone
+                if self.currentPlayer == self.player1:  # Black stone
                     painter.setBrush(QColor(0, 0, 0))  # Set brush color to black
                 else:
                     painter.setBrush(QColor(255, 255, 255))  # Set brush color to white
-                radius = (self.squareWidth() - 2) / 2
+                radius = int((self.squareWidth()-2 ) / 3)
                 center = QPoint(radius, radius)
                 painter.drawEllipse(center, radius, radius)
                   
