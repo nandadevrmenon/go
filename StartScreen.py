@@ -133,7 +133,7 @@ class StartScreen(QMainWindow):
 
     def validate_player_name(self, name):
         # Minimum and maximum length check
-        if len(name) < 1:
+        if len(name) < 2:
             return False, "Name must be longer"
 
         if len(name) > 10:
