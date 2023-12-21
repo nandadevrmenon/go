@@ -11,8 +11,8 @@ class Board(QFrame):  # base the board on a QFrame widget
     )  # signal sent when there is a new click location
 
     # TODO set the board width and height to be square
-    boardWidth = 10  # board is 0 squares wide # TODO this needs updating
-    boardHeight = 10  #
+    boardWidth = 7  # board is 7 squares wide # TODO - DONE this needs updating
+    boardHeight = 7  #
     timerSpeed = 1000  # the timer updates every 1 second
     counter = 10  # the number the counter will count down from
 
@@ -30,9 +30,19 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.start()  # start the game which will start the timer
 
         self.boardArray = (
-            []
-        )  # TODO - create a 2d int/Piece array to store the state of the game
-        # self.printBoardArray()    # TODO - uncomment this method after creating the array above
+            [
+                # 7, 7, 7, 7, 7, 7, 7, 7, 7,
+                # 7, 0, 0, 0, 0, 0, 0, 0, 7, 
+                # 7, 0, 0, 0, 0, 0, 0, 0, 7, 
+                # 7, 0, 0, 0, 0, 0, 0, 0, 7, 
+                # 7, 0, 0, 0, 0, 0, 0, 0, 7, 
+                # 7, 0, 0, 0, 0, 0, 0, 0, 7, 
+                # 7, 0, 0, 0, 0, 0, 0, 0, 7, 
+                # 7, 0, 0, 0, 0, 0, 0, 0, 7, 
+                # 7, 7, 7, 7, 7, 7, 7, 7, 7,
+            ]
+        )  # TODO - DONE create a 2d int/Piece array to store the state of the game
+        self.printBoardArray()  # TODO - DONE uncomment this method after creating the array above
 
     def printBoardArray(self):
         """prints the boardArray in an attractive way"""
@@ -59,16 +69,18 @@ class Board(QFrame):  # base the board on a QFrame widget
         """starts game"""
         self.isStarted = (
             True  # set the boolean which determines if the game has started to TRUE
-        )
+        ) 
         self.resetGame()  # reset the game
         self.timer.start(self.timerSpeed)  # start the timer with the correct speed
         print("start () - timer is started")
 
     def timerEvent(self):
         """this event is automatically called when the timer is updated. based on the timerSpeed variable"""
-        # TODO adapt this code to handle your timers
-        if Board.counter == 0:
+        # TODO - DONE adapt this code to handle your timers
+        if self.counter == 0:
             print("Game over")
+            self.timer.stop()
+            return None
         self.counter -= 1
         print("timerEvent()", self.counter)
         self.updateTimerSignal.emit(self.counter)
@@ -91,6 +103,7 @@ class Board(QFrame):  # base the board on a QFrame widget
     def resetGame(self):
         """clears pieces from the board"""
         # TODO write code to reset game
+        self.boardArray = []
 
     def tryMove(self, newX, newY):
         """tries to move a piece"""
@@ -114,9 +127,13 @@ class Board(QFrame):  # base the board on a QFrame widget
             for col in range(0, len(self.boardArray[0])):
                 painter.save()
                 painter.translate(col * self.squareWidth(), row * self.squareHeight())
-                # TODO draw some pieces as ellipses
-                # TODO choose your color and set the painter brush to the correct color
+                # TODO - DONE draw some pieces as ellipses,  and set the painter brush to the correct color
+                if self.currentPlayer == self.playerOne:  # Black stone
+                    painter.setBrush(QColor(0, 0, 0))  # Set brush color to black
+                else:
+                    painter.setBrush(QColor(255, 255, 255))  # Set brush color to white
                 radius = (self.squareWidth() - 2) / 2
                 center = QPoint(radius, radius)
                 painter.drawEllipse(center, radius, radius)
-                painter.restore()
+                  
+
