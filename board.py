@@ -35,8 +35,8 @@ class Board(QFrame):  # base the board on a QFrame widget
 
         self.boardArray = (
             # [(0 for i in range(7)) for i in range(7)]
-            [0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0],
+            [0,0,0,2,2,0,0],
+            [0,0,1,0,0,0,0],
             [0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0],
@@ -110,16 +110,27 @@ class Board(QFrame):  # base the board on a QFrame widget
         """tries to move a piece"""
         pass  # Implement this method according to your logic
 
-    def drawBoardSquares(self, painter):
+    def drawBoardSquares(self, painter):        
         """draw all the square on the board"""
         squareWidth = int(self.squareWidth())
         squareHeight = int(self.squareHeight())
+
+        darkBrown = QColor(101, 67, 33)  # Dark brown color
+        woodBrown = QColor(193, 154, 107)  # Wood brown color
+        borderThickness = 5 # border size
+
         for row in range(0, Board.boardHeight):
             for col in range(0, Board.boardWidth):
                 painter.save()
                 painter.translate(col * squareWidth, row * squareHeight)
-                painter.setBrush(QBrush(QColor(0, 0, 0)))  # Set brush color
-                painter.drawRect(0, 0, squareWidth, squareHeight)  # Draw rectangles
+            
+                painter.fillRect(0, 0, squareWidth, borderThickness, darkBrown)  # Top border
+                painter.fillRect(0, 0, borderThickness, squareHeight, darkBrown)  # Left border
+                painter.fillRect(squareWidth - borderThickness, 0, borderThickness, squareHeight, darkBrown)  # Right border
+                painter.fillRect(0, squareHeight - borderThickness, squareWidth, borderThickness, darkBrown)  # Bottom border
+
+                # Draw wood brown background
+                painter.fillRect(borderThickness, borderThickness, squareWidth - 2 * borderThickness, squareHeight - 2 * borderThickness, woodBrown)
                 painter.restore()
 
     def drawPieces(self, painter):
@@ -136,5 +147,3 @@ class Board(QFrame):  # base the board on a QFrame widget
                 radius = int((self.squareWidth()-2 ) / 3)
                 center = QPoint(radius, radius)
                 painter.drawEllipse(center, radius, radius)
-                  
-
