@@ -176,7 +176,7 @@ class Board(QFrame):  # base the board on a QFrame widget
                     continue  # Empty intersection, move to the next
 
                 radius = int((self.squareWidth() - 2) / 3)
-                center = QPoint(int(self.squareWidth()) // 2, int(self.squareHeight()) // 2)
+                center = QPoint(0, 0)
                 # center = QPoint(int(self.squareWidth()) // 2, int(self.squareHeight()) // 2)
 
                 # Draw the piece
