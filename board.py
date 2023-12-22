@@ -148,17 +148,22 @@ class Board(QFrame):  # base the board on a QFrame widget
                 if row == 0:
                     text = col_labels[col]
                     painter.setFont(font)
+                    painter.setPen(QColor(50,70,90))
                     painter.drawText(borderThickness - (font.pointSize()//2), squareHeight//10 + font.pointSize(), text)
 
                 if col == 0:
                     text = row_labels[row]
                     painter.setFont(font)
+                    painter.setPen(QColor(50,70,90))
                     painter.drawText(borderThickness + (font.pointSize()//2), int(squareHeight - font.pointSize()*2.5),text)
 
                 painter.restore()
 
     def drawPieces(self, painter):
         """draw the pieces on the board"""
+        black_stone = QPixmap(QtCore.QDir.currentPath() + "/images/black_piece.png")
+        white_stone = QPixmap(QtCore.QDir.currentPath() + "/images/white_piece.png")
+
         for row in range(0, len(self.boardArray)):
             for col in range(0, len(self.boardArray[0])):
                 painter.save()
@@ -167,21 +172,24 @@ class Board(QFrame):  # base the board on a QFrame widget
 
                 # TODO - DONE draw some pieces as ellipses,  and set the painter brush to the correct color
                 if self.boardArray[row][col] == 1:  # Black stone
-                    pieceColor = QColor(0, 0, 0)  # Set brush color to black
+                    # pieceColor = QColor(0, 0, 0)  # Set brush color to black
+                    stone_image = black_stone
                 elif self.boardArray[row][col] == 2:  # White stone
                     # Set brush color to white
-                    pieceColor = QColor(255, 255, 255)
+                    # pieceColor = QColor(255, 255, 255)
+                    stone_image = white_stone
                 else:
                     painter.restore()
                     continue  # Empty intersection, move to the next
 
-                radius = int((self.squareWidth() - 2) / 3)
+                radius = int((self.squareWidth() - 2) / 2.2)
                 center = QPoint(0, 0)
                 # center = QPoint(int(self.squareWidth()) // 2, int(self.squareHeight()) // 2)
 
                 # Draw the piece
-                painter.setBrush(pieceColor)
-                painter.drawEllipse(center, radius, radius)
+                # painter.setBrush(pieceColor)
+                # painter.drawEllipse(center, radius, radius)
+                painter.drawPixmap(center.x() - radius, center.y() - radius, radius * 2, radius * 2, stone_image)
 
                 painter.restore()
 
