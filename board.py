@@ -17,6 +17,7 @@ class Board(QFrame):  # base the board on a QFrame widget
     timerSpeed = 1000  # the timer updates every 1 second
     counter = 10  # the number the counter will count down from
 
+
     def __init__(self, player1, player2, currentPlayer):
         super().__init__()
         self.initBoard()
@@ -61,11 +62,13 @@ class Board(QFrame):  # base the board on a QFrame widget
 
     def squareWidth(self):
         """returns the width of one square in the board"""
-        return self.contentsRect().width() / self.boardWidth
+        return self.boardWidth * 8
+        # return self.contentsRect().width() / self.boardWidth
 
     def squareHeight(self):
         """returns the height of one square of the board"""
-        return self.contentsRect().height() / self.boardHeight
+        return self.boardHeight * 8
+        # return self.contentsRect().height() / self.boardHeight
 
     def start(self):
         """starts game"""
@@ -145,26 +148,11 @@ class Board(QFrame):  # base the board on a QFrame widget
 
                 # Exclude borders for label squares
                 if row > 0 and col > 0 and row < 7 and col < 7:
-                    painter.fillRect(
-                        0, 0, squareWidth, borderThickness, darkBrown
-                    )  # Top border
-                    painter.fillRect(
-                        0, 0, borderThickness, squareHeight, darkBrown
-                    )  # Left border
-                    painter.fillRect(
-                        squareWidth - borderThickness,
-                        0,
-                        borderThickness,
-                        squareHeight,
-                        darkBrown,
-                    )  # Right border
-                    painter.fillRect(
-                        0,
-                        squareHeight - borderThickness,
-                        squareWidth,
-                        borderThickness,
-                        darkBrown,
-                    )  # Bottom border
+
+                    painter.fillRect(0, 0, squareWidth, borderThickness, darkBrown)  # Top border
+                    painter.fillRect(0, 0, borderThickness, squareHeight, darkBrown)  # Left border
+                    painter.fillRect(squareWidth - borderThickness, 0, borderThickness, squareHeight, darkBrown)  # Right border
+                    painter.fillRect(0, squareHeight - borderThickness, squareWidth, borderThickness, darkBrown)  # Bottom border
 
                 # Add labels without border
                 if row == 0:
