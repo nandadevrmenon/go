@@ -3,6 +3,7 @@ from PyQt6 import QtCore
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 
+
 class Board(QFrame):  # base the board on a QFrame widget
     # signal sent when the timer is updated
     updateTimerSignal = pyqtSignal(int)
@@ -15,6 +16,7 @@ class Board(QFrame):  # base the board on a QFrame widget
     boardHeight = 8  #
     timerSpeed = 1000  # the timer updates every 1 second
     counter = 10  # the number the counter will count down from
+
 
     def __init__(self, player1, player2, currentPlayer):
         super().__init__()
@@ -50,8 +52,7 @@ class Board(QFrame):  # base the board on a QFrame widget
         print("boardArray:")
         print(
             "\n".join(
-                ["\t".join([str(cell) for cell in row])
-                 for row in self.boardArray]
+                ["\t".join([str(cell) for cell in row]) for row in self.boardArray]
             )
         )
 
@@ -61,11 +62,13 @@ class Board(QFrame):  # base the board on a QFrame widget
 
     def squareWidth(self):
         """returns the width of one square in the board"""
-        return self.contentsRect().width() / self.boardWidth
+        return self.boardWidth * 8
+        # return self.contentsRect().width() / self.boardWidth
 
     def squareHeight(self):
         """returns the height of one square of the board"""
-        return self.contentsRect().height() / self.boardHeight
+        return self.boardHeight * 8
+        # return self.contentsRect().height() / self.boardHeight
 
     def start(self):
         """starts game"""
@@ -92,7 +95,8 @@ class Board(QFrame):  # base the board on a QFrame widget
         """paints the board and the pieces of the game"""
         painter = QPainter(self)
         self.drawBoardSquares(painter)
-        self.drawPieces(painter)
+        stone = AnimatedPiece(painter, self.boardArray, self.squareWidth(), self.squareHeight())
+        stone.drawPieces()
 
     def mousePressEvent(self, event):
         """this event is automatically called when the mouse is pressed"""
@@ -105,13 +109,14 @@ class Board(QFrame):  # base the board on a QFrame widget
         print(row, col)
 
         valid_move = self.tryMove(col + 1, row + 1)
-        if valid_move:
-            self.drawPieces(painter)
-        elif not valid_move:
-            self.drawPieces(painter)
+
+        # 
+        # if valid_move:
+        #     AnimatedPiece(self)
+        # elif not valid_move:
+        #     self.drawPieces(painter)
 
         self.update()
-
 
     def resetGame(self):
         """clears pieces from the board"""
@@ -132,8 +137,8 @@ class Board(QFrame):  # base the board on a QFrame widget
         woodBrown = QColor(193, 154, 107)  # Wood brown color
         borderThickness = 5  # border size
 
-        row_labels = ['','1', '2', '3', '4', '5', '6', '7', '']
-        col_labels = ['','A', 'B', 'C', 'D', 'E', 'F', 'H', '']
+        row_labels = ["", "1", "2", "3", "4", "5", "6", "7", ""]
+        col_labels = ["", "A", "B", "C", "D", "E", "F", "H", ""]
         font = QFont(statliches, 24)  # Font for the labels
 
         for row in range(0, Board.boardHeight):
@@ -146,27 +151,29 @@ class Board(QFrame):  # base the board on a QFrame widget
 
                 # Exclude borders for label squares
                 if row > 0 and col > 0 and row < 7 and col < 7:
-                    painter.fillRect(0, 0, squareWidth,
-                                     borderThickness, darkBrown)  # Top border
-                    painter.fillRect(0, 0, borderThickness,
-                                     squareHeight, darkBrown)  # Left border
-                    painter.fillRect(squareWidth - borderThickness, 0,
-                                     borderThickness, squareHeight, darkBrown)  # Right border
-                    painter.fillRect(0, squareHeight - borderThickness,
-                                     squareWidth, borderThickness, darkBrown)  # Bottom border
+
+                    painter.fillRect(0, 0, squareWidth, borderThickness, darkBrown)  # Top border
+                    painter.fillRect(0, 0, borderThickness, squareHeight, darkBrown)  # Left border
+                    painter.fillRect(squareWidth - borderThickness, 0, borderThickness, squareHeight, darkBrown)  # Right border
+                    painter.fillRect(0, squareHeight - borderThickness, squareWidth, borderThickness, darkBrown)  # Bottom border
 
                 # Add labels without border
                 if row == 0:
                     text = col_labels[col]
                     painter.setFont(font)
                     painter.setPen(QColor(50, 70, 90))
-                    painter.drawText(borderThickness - (font.pointSize()//2), squareHeight//10 + font.pointSize(), text)
 
+                    painter.drawText(borderThickness - (font.pointSize()//2), squareHeight//10 + font.pointSize(), text)
+                    
                 if col == 0:
                     text = row_labels[row]
                     painter.setFont(font)
-                    painter.setPen(QColor(50,70,90))
-                    painter.drawText(borderThickness + (font.pointSize()//2), int(squareHeight - font.pointSize()*2.5),text)
+                    painter.setPen(QColor(50, 70, 90))
+                    painter.drawText(
+                        borderThickness + (font.pointSize() // 2),
+                        int(squareHeight - font.pointSize() * 2.5),
+                        text,
+                    )
 
                 painter.restore()
 
@@ -179,11 +186,12 @@ class Board(QFrame):  # base the board on a QFrame widget
         for row in range(0, len(self.boardArray)):
             for col in range(0, len(self.boardArray[0])):
                 painter.save()
-                painter.translate(col * self.squareWidth(),
-                                  row * self.squareHeight())
+                painter.translate(col * self.squareWidth(), row * self.squareHeight())
 
                 # TODO - DONE draw some pieces as ellipses,  and set the painter brush to the correct color
                 if self.boardArray[row][col] == 1:  # Black stone
+                    stone = AnimatedPiece(self)
+                    
                     pieceColor = QColor(0, 0, 0)  # Set brush color to black
                     # stone_image = black_stone
                 elif self.boardArray[row][col] == 2:  # White stone
@@ -200,7 +208,6 @@ class Board(QFrame):  # base the board on a QFrame widget
                 # Draw the piece
                 painter.setBrush(pieceColor)
                 painter.drawEllipse(center, radius, radius)
-                
                 painter.restore()
 
     def get_statliches_font(self):
@@ -211,3 +218,50 @@ class Board(QFrame):  # base the board on a QFrame widget
             return QFontDatabase.applicationFontFamilies(font_id)[0]
         else:
             return "Helvetica"  # fallback
+        
+
+class AnimatedPiece(QWidget):
+    def __init__(self,  painter, boardArray, squareWidth, squareHeight):
+        super().__init__()
+        self.painter = painter
+        self.boardArray = boardArray
+        self.squareWidth = squareWidth
+        self.squareHeight = squareHeight
+        self.setGeometry(100, 100, 400, 400)
+        self.animation = QPropertyAnimation(self, b"pos")
+        self.animation.setStartValue(QPoint(50, 50))
+        self.animation.setEndValue(QPoint(300, 300))
+        self.animation.setDuration(2000)  # Duration in milliseconds
+        self.animation.start()
+
+    def drawPieces(self):
+        self.painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        for row in range(0, len(self.boardArray)):
+            for col in range(0, len(self.boardArray[0])):
+                self.painter.save()
+                self.painter.translate(col * self.squareWidth, row * self.squareHeight)
+
+                # TODO - DONE draw some pieces as ellipses,  and set the painter brush to the correct color
+                # if self.boardArray[row][col] == 1:  # Black stone
+                #     pieceColor = QColor(0, 0, 0)  # Set brush color to black
+                #     # stone_image = black_stone
+                # elif self.boardArray[row][col] == 2:  # White stone
+                #     # Set brush color to white
+                #     pieceColor = QColor(255, 255, 255)
+                #     # stone_image = white_stone
+                # else:
+                #     self.painter.restore()
+                #     continue  # Empty intersection, move to the next
+
+                painter = QPainter(self)
+                painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+                painter.setBrush(QColor(0, 0, 0))
+
+                radius = int((self.squareWidth - 2) / 2.2)
+                center = QPoint(0, 0)
+
+                # Draw the piece
+                # self.painter.setBrush(pieceColor)
+                self.painter.drawEllipse(center, radius, radius)
+                
+                self.painter.restore()
