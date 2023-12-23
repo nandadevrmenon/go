@@ -50,7 +50,7 @@ class GameScreen(QMainWindow):
         self.play_area = QWidget()
         play_area_layout = QVBoxLayout()
         play_area_layout.setContentsMargins(0, 20, 0, 0)
-        play_area_layout.setSpacing(0)
+        # play_area_layout.setSpacing(0)
         self.play_area.setLayout(play_area_layout)
 
         button_dock = QWidget()
@@ -70,9 +70,14 @@ class GameScreen(QMainWindow):
         button_dock_layout.addWidget(resign_button)
         button_dock_layout.addWidget(pause_button)
 
+        center_board = QHBoxLayout()
         self.board = Board(self.player1, self.player2, self.currentPlayer)
 
-        play_area_layout.addWidget(self.board)
+        center_board.addStretch()
+        center_board.addWidget(self.board)
+        center_board.addStretch()
+
+        play_area_layout.addLayout(center_board)
         play_area_layout.addWidget(button_dock)
 
         # create a Side bar into which the player info is passed (so it can create dialogs using that info which is readily available)

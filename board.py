@@ -4,6 +4,7 @@ from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 
 
+
 class Board(QFrame):  # base the board on a QFrame widget
     # signal sent when the timer is updated
     updateTimerSignal = pyqtSignal(int)
@@ -24,6 +25,8 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.player1 = player1
         self.player2 = player2
         self.currentPlayer = currentPlayer
+        self.setFixedWidth(640)        
+        self.setFixedHeight(640)        
 
     def initBoard(self):
         """initiates board"""
@@ -171,7 +174,7 @@ class Board(QFrame):  # base the board on a QFrame widget
                     painter.setPen(QColor(50, 70, 90))
                     painter.drawText(
                         borderThickness + (font.pointSize() // 2),
-                        int(squareHeight - font.pointSize() * 2.5),
+                        int(squareHeight - font.pointSize() * 2.9),
                         text,
                     )
 
