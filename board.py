@@ -24,6 +24,8 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.player1 = player1
         self.player2 = player2
         self.currentPlayer = currentPlayer
+        self.setFixedWidth(640)        
+        self.setFixedHeight(640)        
 
     def initBoard(self):
         """initiates board"""
@@ -62,13 +64,11 @@ class Board(QFrame):  # base the board on a QFrame widget
 
     def squareWidth(self):
         """returns the width of one square in the board"""
-        return self.boardWidth * 8
-        # return self.contentsRect().width() / self.boardWidth
+        return self.contentsRect().width() / self.boardWidth
 
     def squareHeight(self):
         """returns the height of one square of the board"""
-        return self.boardHeight * 8
-        # return self.contentsRect().height() / self.boardHeight
+        return self.contentsRect().height() / self.boardHeight
 
     def start(self):
         """starts game"""
@@ -168,7 +168,7 @@ class Board(QFrame):  # base the board on a QFrame widget
                     painter.setPen(QColor(50, 70, 90))
                     painter.drawText(
                         borderThickness + (font.pointSize() // 2),
-                        int(squareHeight - font.pointSize() * 2.5),
+                        int(squareHeight - font.pointSize() * 2.9),
                         text,
                     )
 
