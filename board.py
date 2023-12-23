@@ -95,11 +95,22 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.drawPieces(painter)
 
     def mousePressEvent(self, event):
-        """This event is automatically called when the mouse is pressed."""
-        clickLoc = "click location [" + str(event.x()) + "," + str(event.y()) + "]"
-        print("mousePressEvent() - " + clickLoc)
-        # TODO you could call some game logic here
-        self.clickLocationSignal.emit(clickLoc)
+        """this event is automatically called when the mouse is pressed"""
+        painter = QPainter(self)
+        clickPos = event.pos()
+        
+        row = clickPos.x() // (self.height() // 7)
+        col = clickPos.y() // (self.width() // 8)
+        print("height = ", self.height(), self.width())
+        print(row, col)
+
+        valid_move = self.tryMove(col + 1, row + 1)
+        if valid_move:
+            self.drawPieces(painter)
+        elif not valid_move:
+            self.drawPieces(painter)
+
+        self.update()
 
     def resetGame(self):
         """clears pieces from the board"""
@@ -107,8 +118,9 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.boardArray = []
 
     def tryMove(self, newX, newY):
-        """tries to move a piece"""
-        pass  # Implement this method according to your logic
+        self.boardArray[newX][newY] = 1
+        print(self.boardArray)
+        return True
 
     def drawBoardSquares(self, painter):
         """draw all the square on the board"""
@@ -159,12 +171,9 @@ class Board(QFrame):  # base the board on a QFrame widget
                     text = col_labels[col]
                     painter.setFont(font)
                     painter.setPen(QColor(50, 70, 90))
-                    painter.drawText(
-                        borderThickness - (font.pointSize() // 2),
-                        squareHeight // 10 + font.pointSize(),
-                        text,
-                    )
 
+                    painter.drawText(borderThickness - (font.pointSize()//2), squareHeight//10 + font.pointSize(), text)
+                    
                 if col == 0:
                     text = row_labels[row]
                     painter.setFont(font)
@@ -179,6 +188,7 @@ class Board(QFrame):  # base the board on a QFrame widget
 
     def drawPieces(self, painter):
         """draw the pieces on the board"""
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         black_stone = QPixmap(QtCore.QDir.currentPath() + "/images/black_piece.png")
         white_stone = QPixmap(QtCore.QDir.currentPath() + "/images/white_piece.png")
 
@@ -189,31 +199,22 @@ class Board(QFrame):  # base the board on a QFrame widget
 
                 # TODO - DONE draw some pieces as ellipses,  and set the painter brush to the correct color
                 if self.boardArray[row][col] == 1:  # Black stone
-                    # pieceColor = QColor(0, 0, 0)  # Set brush color to black
-                    stone_image = black_stone
+                    pieceColor = QColor(0, 0, 0)  # Set brush color to black
+                    # stone_image = black_stone
                 elif self.boardArray[row][col] == 2:  # White stone
                     # Set brush color to white
-                    # pieceColor = QColor(255, 255, 255)
-                    stone_image = white_stone
+                    pieceColor = QColor(255, 255, 255)
+                    # stone_image = white_stone
                 else:
                     painter.restore()
                     continue  # Empty intersection, move to the next
 
                 radius = int((self.squareWidth() - 2) / 2.2)
                 center = QPoint(0, 0)
-                # center = QPoint(int(self.squareWidth()) // 2, int(self.squareHeight()) // 2)
 
                 # Draw the piece
-                # painter.setBrush(pieceColor)
-                # painter.drawEllipse(center, radius, radius)
-                painter.drawPixmap(
-                    center.x() - radius,
-                    center.y() - radius,
-                    radius * 2,
-                    radius * 2,
-                    stone_image,
-                )
-
+                painter.setBrush(pieceColor)
+                painter.drawEllipse(center, radius, radius)
                 painter.restore()
 
     def get_statliches_font(self):
