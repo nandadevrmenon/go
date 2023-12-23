@@ -3,6 +3,7 @@ from PyQt6 import QtCore
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 
+
 class Board(QFrame):  # base the board on a QFrame widget
     # signal sent when the timer is updated
     updateTimerSignal = pyqtSignal(int)
@@ -50,8 +51,7 @@ class Board(QFrame):  # base the board on a QFrame widget
         print("boardArray:")
         print(
             "\n".join(
-                ["\t".join([str(cell) for cell in row])
-                 for row in self.boardArray]
+                ["\t".join([str(cell) for cell in row]) for row in self.boardArray]
             )
         )
 
@@ -95,10 +95,8 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.drawPieces(painter)
 
     def mousePressEvent(self, event):
-        """this event is automatically called when the mouse is pressed"""
-        clickLoc = (
-            "click location [" + str(event.x()) + "," + str(event.y()) + "]"
-        )  # the location where a mouse click was registered
+        """This event is automatically called when the mouse is pressed."""
+        clickLoc = "click location [" + str(event.x()) + "," + str(event.y()) + "]"
         print("mousePressEvent() - " + clickLoc)
         # TODO you could call some game logic here
         self.clickLocationSignal.emit(clickLoc)
@@ -121,8 +119,8 @@ class Board(QFrame):  # base the board on a QFrame widget
         woodBrown = QColor(193, 154, 107)  # Wood brown color
         borderThickness = 5  # border size
 
-        row_labels = ['','1', '2', '3', '4', '5', '6', '7', '']
-        col_labels = ['','A', 'B', 'C', 'D', 'E', 'F', 'H', '']
+        row_labels = ["", "1", "2", "3", "4", "5", "6", "7", ""]
+        col_labels = ["", "A", "B", "C", "D", "E", "F", "H", ""]
         font = QFont(statliches, 24)  # Font for the labels
 
         for row in range(0, Board.boardHeight):
@@ -135,27 +133,47 @@ class Board(QFrame):  # base the board on a QFrame widget
 
                 # Exclude borders for label squares
                 if row > 0 and col > 0 and row < 7 and col < 7:
-                    painter.fillRect(0, 0, squareWidth,
-                                     borderThickness, darkBrown)  # Top border
-                    painter.fillRect(0, 0, borderThickness,
-                                     squareHeight, darkBrown)  # Left border
-                    painter.fillRect(squareWidth - borderThickness, 0,
-                                     borderThickness, squareHeight, darkBrown)  # Right border
-                    painter.fillRect(0, squareHeight - borderThickness,
-                                     squareWidth, borderThickness, darkBrown)  # Bottom border
+                    painter.fillRect(
+                        0, 0, squareWidth, borderThickness, darkBrown
+                    )  # Top border
+                    painter.fillRect(
+                        0, 0, borderThickness, squareHeight, darkBrown
+                    )  # Left border
+                    painter.fillRect(
+                        squareWidth - borderThickness,
+                        0,
+                        borderThickness,
+                        squareHeight,
+                        darkBrown,
+                    )  # Right border
+                    painter.fillRect(
+                        0,
+                        squareHeight - borderThickness,
+                        squareWidth,
+                        borderThickness,
+                        darkBrown,
+                    )  # Bottom border
 
                 # Add labels without border
                 if row == 0:
                     text = col_labels[col]
                     painter.setFont(font)
-                    painter.setPen(QColor(50,70,90))
-                    painter.drawText(borderThickness - (font.pointSize()//2), squareHeight//10 + font.pointSize(), text)
+                    painter.setPen(QColor(50, 70, 90))
+                    painter.drawText(
+                        borderThickness - (font.pointSize() // 2),
+                        squareHeight // 10 + font.pointSize(),
+                        text,
+                    )
 
                 if col == 0:
                     text = row_labels[row]
                     painter.setFont(font)
-                    painter.setPen(QColor(50,70,90))
-                    painter.drawText(borderThickness + (font.pointSize()//2), int(squareHeight - font.pointSize()*2.5),text)
+                    painter.setPen(QColor(50, 70, 90))
+                    painter.drawText(
+                        borderThickness + (font.pointSize() // 2),
+                        int(squareHeight - font.pointSize() * 2.5),
+                        text,
+                    )
 
                 painter.restore()
 
@@ -167,8 +185,7 @@ class Board(QFrame):  # base the board on a QFrame widget
         for row in range(0, len(self.boardArray)):
             for col in range(0, len(self.boardArray[0])):
                 painter.save()
-                painter.translate(col * self.squareWidth(),
-                                  row * self.squareHeight())
+                painter.translate(col * self.squareWidth(), row * self.squareHeight())
 
                 # TODO - DONE draw some pieces as ellipses,  and set the painter brush to the correct color
                 if self.boardArray[row][col] == 1:  # Black stone
@@ -189,7 +206,13 @@ class Board(QFrame):  # base the board on a QFrame widget
                 # Draw the piece
                 # painter.setBrush(pieceColor)
                 # painter.drawEllipse(center, radius, radius)
-                painter.drawPixmap(center.x() - radius, center.y() - radius, radius * 2, radius * 2, stone_image)
+                painter.drawPixmap(
+                    center.x() - radius,
+                    center.y() - radius,
+                    radius * 2,
+                    radius * 2,
+                    stone_image,
+                )
 
                 painter.restore()
 
