@@ -17,14 +17,32 @@ class GameLogic:
         piece = board[y][x]
         if piece.type != 0:  # already a piece there
             return None
-        if piece.liberties == 0:
-            if piece.has_all_nieghbours_of_type(type):
-                GameLogic.place_piece(type, piece)
-                GameLogic.decrement_neighbour_liberties(piece)
-                piece.add_to_group()
-                GameLogic.check_captures_near(piece)
+        if piece.liberties == 0:  # if piece is surrounded
+            # if piece.has_all_nieghbours_of_type(type):
+            #     GameLogic.place_piece(type, piece)
+            #     GameLogic.decrement_neighbour_liberties(piece)
+            #     piece.add_to_group()
+            #     GameLogic.check_captures_near(piece)
+            #     return True
+            # else:  # it is suicide
+            #     GameLogic.display_wrong_move()
+            #     return False
+            GameLogic.place_piece(type, piece)  # place the piece as a test
+            GameLogic.decrement_neighbour_liberties(
+                piece
+            )  # change the liberties of neighbours
+            if piece.has_all_nieghbours_of_type(
+                type
+            ):  # if the pieces on all four sides are the same colour as this piece it is a valid move
                 return True
-            else:  # it is suicide
+            elif GameLogic.check_captures_near(
+                piece
+            ):  # if not all four are the same colour then check
+                piece.add_to_group()
+                return True
+            else:
+                piece.remove()
+                GameLogic.increment_neighbour_liberties()
                 GameLogic.display_wrong_move()
                 return False
         else:
@@ -57,7 +75,6 @@ class GameLogic:
 
     def place_piece(type, piece):
         piece.type = type
-        print("placing piece")
 
     # def remove_piece(piece):
     #     piece.type = 0
@@ -68,19 +85,49 @@ class GameLogic:
         for piece in neighbours:
             piece.liberties = piece.liberties - 1
 
+    def increment_neighbour_liberties(piece):
+        neighbours = piece.get_neighbours()
+        for piece in neighbours:
+            piece.liberties = piece.liberties + 1
+
     def check_captures_near(piece):
         neighbours = piece.get_neighbours()
         groups = [piece.group for piece in neighbours if piece.group is not None]
+        capture_count = 0
         for group in groups:
             if not (group.check_for_life()):
                 print("group found dead")
                 removed_pieces = group.remove()
+                capture_count += len(removed_pieces)
+            else:
+                print("group", str(group), "is alive")
+
+        return capture_count
 
     def print_board():
         for row in GameLogic.board:
             for element in row:
                 print(element.type, end=" ")  # Print each element in the row
             print()  # Move to the next line for the next row
+        print("****LIBERTIES*******")
+        for row in GameLogic.board:
+            for element in row:
+                print(element.liberties, end=" ")  # Print each element in the row
+            print()  # Move to the next line for the next row
+        print("*****GROUPS*****")
+        print(str(GameLogic.all_groups))
+
+    def get_board_state():
+        state = []
+        for row in GameLogic.board:
+            state_row = []
+            for piece in row:
+                state_row.append(piece.type)
+            state.append(state_row)
+        return state
+
+    def make_board_from_state(new_state):
+        pass
 
     # for groups, check how to know whcih group a piece is in. Then for every cpature you will have a function that
 
