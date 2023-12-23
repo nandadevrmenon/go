@@ -148,6 +148,7 @@ class Board(QFrame):  # base the board on a QFrame widget
 
                 # Exclude borders for label squares
                 if row > 0 and col > 0 and row < 7 and col < 7:
+
                     painter.fillRect(0, 0, squareWidth, borderThickness, darkBrown)  # Top border
                     painter.fillRect(0, 0, borderThickness, squareHeight, darkBrown)  # Left border
                     painter.fillRect(squareWidth - borderThickness, 0, borderThickness, squareHeight, darkBrown)  # Right border
