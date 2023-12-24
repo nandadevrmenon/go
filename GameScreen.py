@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QMainWindow, QApplication, QHBoxLayout, QVBoxLayout
-from PyQt6.QtCore import pyqtSignal, Qt
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QAction, QIcon
 
 import sys
@@ -9,6 +9,8 @@ from board import Board
 from PrimaryButton import PrimaryButton
 import math
 
+from game_logic import GameLogic
+
 # from DrawingArea import DrawingArea
 # from HelpDialog import HelpDialog
 # from AboutDialog import AboutDialog
@@ -17,13 +19,24 @@ import math
 class GameScreen(QMainWindow):
     back_to_start_signal = pyqtSignal()
 
-    def __init__(self, player1, player2):
+    def __init__(self, p1Name, p2Name):
         super().__init__()
 
-        self.player1 = player1
-        self.player2 = player2
+        self.player1 = {"name": p1Name, "score": [12, 2], "timer": QTimer()}
+        self.player2 = {"name": p2Name, "score": [1, 78], "timer": QTimer()}
         self.currentPlayer = self.player1
-        self.isGameRunning = True
+        self.is_game_running = True
+        self.is_game_started = False
+        self.game_logic = GameLogic()
+
+        game_state = [
+            self.player1,
+            self.player2,
+            self.currentPlayer,
+            self.is_game_started,
+            self.is_game_running,
+            self.game_logic,
+        ]
 
         # set window appearance
         self.setWindowTitle("Go")
@@ -63,15 +76,17 @@ class GameScreen(QMainWindow):
         pass_button = PrimaryButton("Pass", do_nothing)
         resign_button = PrimaryButton("Resign", do_nothing)
         pause_button = PrimaryButton("Pause", do_nothing)
+        reset_button = PrimaryButton("Reset", self.reset_game)
 
         button_dock_layout.addWidget(undo_button)
         button_dock_layout.addWidget(redo_button)
         button_dock_layout.addWidget(pass_button)
         button_dock_layout.addWidget(resign_button)
         button_dock_layout.addWidget(pause_button)
+        button_dock_layout.addWidget(reset_button)
 
         center_board = QHBoxLayout()
-        self.board = Board(self.player1, self.player2, self.currentPlayer)
+        self.board = Board(game_state)
 
         center_board.addStretch()
         center_board.addWidget(self.board)
@@ -82,15 +97,13 @@ class GameScreen(QMainWindow):
 
         # create a Side bar into which the player info is passed (so it can create dialogs using that info which is readily available)
         self.p1_side = SideBar(
-            player1,
+            self.player1,
             False,
-            self.back_to_start_signal,  # pass in the custom signal that makes the start screen open back up
         )
 
         self.p2_side = SideBar(
-            player2,
+            self.player2,
             True,
-            self.back_to_start_signal,  # pass in the custom signal that makes the start screen open back up
         )
 
         # define and adjust main layout
@@ -105,8 +118,24 @@ class GameScreen(QMainWindow):
         self.setCentralWidget(central_widget)
         central_widget.setLayout(main_layout)
 
+    def reset_game(self):
+        print("baord being reset")
+        self.game_logic.reset_board()
+        self.player1["score"] = [0, 0]
+        self.player2["score"] = [0, 0]
+
+        self.p1_side.update_score()
+        self.p1_side.reset_timer()
+        self.p2_side.update_score()
+        self.p2_side.reset_timer()
+        # then redraw an empty board ( or basically call theupdate board method. that basically redarws theboard according to the static vairblae board in the GameLogic class)
+
 
 def do_nothing():
+    pass
+
+
+def redraw_board():
     pass
 
 

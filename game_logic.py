@@ -113,6 +113,19 @@ class GameLogic:
         GameLogic.board_states.append(GameLogic.get_board_state(GameLogic.board))
 
     @staticmethod
+    def reset_board():
+        board_states = [None]
+        board = []
+        all_groups = []
+
+        for i in range(7):
+            board.append([])
+            for j in range(7):
+                board[i].append(Piece(i, j, board, all_groups))
+
+        board_states.append(GameLogic.get_board_state(board))
+
+    @staticmethod
     def print_board(board):
         for row in board:
             for element in row:
@@ -128,7 +141,6 @@ class GameLogic:
 
     # main static variable and static class instantiation
 
-    turn = 0
     board_states = [None]
     board = []
     all_groups = []
@@ -141,28 +153,28 @@ class GameLogic:
     board_states.append(get_board_state(board))
 
 
-logic = GameLogic()
-board, groups = GameLogic.make_board_from_state(
-    [
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 2, 2],
-        [0, 0, 0, 0, 2, 0, 1],
-        [0, 0, 0, 0, 0, 2, 1],
-    ]
-)
+if __name__ == "__main__":
+    logic = GameLogic()
+    board, groups = GameLogic.make_board_from_state(
+        [
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 2, 2],
+            [0, 0, 0, 0, 2, 0, 1],
+            [0, 0, 0, 0, 0, 2, 1],
+        ]
+    )
+    GameLogic.board = board
+    GameLogic.all_groups = groups
+    GameLogic.record_board_state()
+    black = True
+    while True:
+        # Get row and column input
+        row_input = int(input("Enter y value the row()"))
+        column_input = int(input("Enter x value which is the column "))
 
-GameLogic.board = board
-GameLogic.all_groups = groups
-GameLogic.record_board_state()
-black = True
-while True:
-    # Get row and column input
-    row_input = int(input("Enter y value the row()"))
-    column_input = int(input("Enter x value which is the column "))
-
-    if GameLogic.try_move(1 if black else 2, row_input, column_input):
-        black = not black
-    GameLogic.print_board(GameLogic.board)
+        if GameLogic.try_move(1 if black else 2, row_input, column_input):
+            black = not black
+        GameLogic.print_board(GameLogic.board)

@@ -24,9 +24,8 @@ import random, csv
 class SideBar(QWidget):
     def __init__(
         self,
-        player_name,
-        kumi,
-        start_scren_callback,
+        player,
+        has_kumi,
     ):
         super().__init__()
 
@@ -50,17 +49,19 @@ class SideBar(QWidget):
         align_right = Qt.AlignmentFlag.AlignRight
 
         # game variables
-        self.kumi = kumi
-        self.player_name = str(player_name).upper()
-        self.total = 0
+        self.player = player
+        self.has_kumi = has_kumi
+        self.kumi = 7.5 if self.has_kumi else 0
+        self.player_name = str(player["name"]).upper()
+        territory = player["score"][0]
+        captured = player["score"][1]
 
-        self.timer = QTimer()  # to time the rounds
+        self.timer = player["timer"]  # to time the rounds
+        self.timer_counter = 120
+        self.timer.setInterval(1000)
         self.timer.timeout.connect(
-            self.empty
+            self.update_timer
         )  # after every 1 second(which is the timeout for this one) we update the timer label
-        self.start_scren_callback = (
-            start_scren_callback  # function that brigns the start screen back up
-        )
 
         player_box = QWidget()
 
@@ -78,7 +79,7 @@ class SideBar(QWidget):
         self.player_label.setAlignment(align_left)
         self.player_label.setStyleSheet(f"color:{colors['yellow']}")
 
-        color_label = QLabel("White" if self.kumi else "Black")
+        color_label = QLabel("White" if self.has_kumi else "Black")
         color_label.setFont(statliches_heading2)
         color_label.setStyleSheet(font_color_white)
         color_label.setAlignment(
@@ -88,7 +89,7 @@ class SideBar(QWidget):
         # shows the time remaining and is being updated by the QTimer
         self.timer_label = QLabel("02 : 00")
         self.timer_label.setFont(statliches_heading2)
-        self.timer_label.setAlignment(align_right if self.kumi else align_left)
+        self.timer_label.setAlignment(align_right if self.has_kumi else align_left)
 
         # add everything to the turnbox vertical layout
         player_box_grid.addWidget(self.player_label, 0, 0, 1, 1)
@@ -104,11 +105,11 @@ class SideBar(QWidget):
         score_box.setContentsMargins(0, 0, 0, 20)
 
         # score heading
-        total_label = QLabel("SCORE : 0")
-        total_label.setFont(statliches_heading1)
-        total_label.setAlignment(align_right if self.kumi else align_left)
-        total_label.setStyleSheet(font_color_white)
-        total_label.setContentsMargins(0, 5, 0, 10)
+        self.total_label = QLabel("SCORE : " + str(territory + captured + self.kumi))
+        self.total_label.setFont(statliches_heading1)
+        self.total_label.setAlignment(align_right if self.has_kumi else align_left)
+        self.total_label.setStyleSheet(font_color_white)
+        self.total_label.setContentsMargins(0, 5, 0, 10)
 
         # player 1's name
         territory_label = QLabel("Territory")
@@ -117,7 +118,7 @@ class SideBar(QWidget):
         territory_label.setStyleSheet(font_color_white)
 
         # player 1's score
-        self.territory_value = QLabel(str(self.total))
+        self.territory_value = QLabel(str(territory))
         self.territory_value.setFont(statliches_heading3)
         self.territory_value.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.territory_value.setStyleSheet(font_color_white)
@@ -128,26 +129,26 @@ class SideBar(QWidget):
         captured_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         captured_label.setStyleSheet(font_color_white)
         # player 2's score
-        self.captured_value = QLabel(str())
+        self.captured_value = QLabel(str(captured))
         self.captured_value.setFont(statliches_heading3)
         self.captured_value.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.captured_value.setStyleSheet(font_color_white)
 
         # kumi
-        kumi_label = QLabel("Captured")
+        kumi_label = QLabel("Kumi")
         kumi_label.setFont(statliches_heading3)
         kumi_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         kumi_label.setStyleSheet(font_color_white)
 
         # kumi score addition if applicable
-        self.kumi_value = QLabel(str())
+        self.kumi_value = QLabel(str(self.kumi))
         self.kumi_value.setFont(statliches_heading3)
         self.kumi_value.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.kumi_value.setStyleSheet(font_color_white)
 
         # add all the widgets created above to the score_grid layout
-        if self.kumi:
-            score_grid.addWidget(total_label, 0, 0, 1, 5)
+        if self.has_kumi:
+            score_grid.addWidget(self.total_label, 0, 0, 1, 5)
             score_grid.addWidget(territory_label, 1, 2, 1, 1)
             score_grid.addWidget(self.territory_value, 1, 4, 1, 1)
             score_grid.addWidget(captured_label, 2, 2, 1, 1)
@@ -155,7 +156,7 @@ class SideBar(QWidget):
             score_grid.addWidget(kumi_label, 3, 2, 1, 1)
             score_grid.addWidget(self.kumi_value, 3, 4, 1, 1)
         else:
-            score_grid.addWidget(total_label, 0, 0, 1, 5)
+            score_grid.addWidget(self.total_label, 0, 0, 1, 5)
             score_grid.addWidget(territory_label, 1, 0, 1, 1)
             score_grid.addWidget(self.territory_value, 1, 2, 1, 1)
             score_grid.addWidget(captured_label, 2, 0, 1, 1)
@@ -173,6 +174,36 @@ class SideBar(QWidget):
         main_vbox.addWidget(player_box)
         main_vbox.addWidget(score_box)
         main_vbox.addItem(spacer)
+
+        self.timer.start()
+
+    def update_score(self):
+        territory = self.player["score"][0]
+        captured = self.player["score"][1]
+
+        self.total_label.setText("SCORE : " + str(territory + captured + self.kumi))
+        self.territory_value.setText(str(territory))
+        self.captured_value.setText(str(captured))
+
+    def update_timer(self):
+        # Update the countdown and display
+        self.timer_counter -= 1
+
+        # Convert remaining seconds to minutes and seconds
+        minutes = self.timer_counter // 60
+        seconds = self.timer_counter % 60
+
+        # Display the countdown in the label
+        self.timer_label.setText(f"{minutes:02} : {seconds:02}")
+
+        if self.timer_counter <= 0:
+            # Stop the timer when the countdown reaches 0
+            self.timer.stop()
+
+    def reset_timer(self):
+        self.timer.stop()
+        self.timer_counter = 120
+        self.timer_label.setText("02 : 00")
 
     def get_press2p_font(self):
         font_path = QtCore.QDir.currentPath() + "/fonts/press.ttf"
@@ -201,5 +232,5 @@ class SideBar(QWidget):
         else:
             return "Helvetica"  # fallback
 
-    def empty(self):
+    def do_nothing(self):
         pass
