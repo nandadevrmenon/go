@@ -3,6 +3,8 @@ from PyQt6 import QtCore
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 
+from game_logic import GameLogic
+
 
 
 class Board(QFrame):  # base the board on a QFrame widget
@@ -12,21 +14,24 @@ class Board(QFrame):  # base the board on a QFrame widget
         str
     )  # signal sent when there is a new click location
 
+    type = 1
+
     # TODO set the board width and height to be square
     boardWidth = 8  # board is 7 squares wide # TODO - DONE this needs updating
     boardHeight = 8  #
     timerSpeed = 1000  # the timer updates every 1 second
     counter = 10  # the number the counter will count down from
 
+    def __init__(self, game_state):
+        player1, player2, currentPlayer, isStarted, isRunning, game_logic = game_state
 
-    def __init__(self, player1, player2, currentPlayer):
         super().__init__()
         self.initBoard()
         self.player1 = player1
         self.player2 = player2
         self.currentPlayer = currentPlayer
-        self.setFixedWidth(640)        
-        self.setFixedHeight(640)        
+        self.setFixedWidth(640)
+        self.setFixedHeight(640)
 
     def initBoard(self):
         """initiates board"""
@@ -105,19 +110,17 @@ class Board(QFrame):  # base the board on a QFrame widget
         """this event is automatically called when the mouse is pressed"""
         painter = QPainter(self)
         clickPos = event.pos()
-        
+
         row = clickPos.x() // (self.height() // 7)
         col = clickPos.y() // (self.width() // 8)
         print("height = ", self.height(), self.width())
         print(row, col)
 
-        valid_move = self.tryMove(col + 1, row + 1)
-
-        # 
-        # if valid_move:
-        #     AnimatedPiece(self)
-        # elif not valid_move:
-        #     self.drawPieces(painter)
+        valid_move = self.tryMove(col, row)
+        if valid_move:
+            self.drawPieces(painter)
+        elif not valid_move:
+            self.drawPieces(painter)
 
         self.update()
 
@@ -126,8 +129,9 @@ class Board(QFrame):  # base the board on a QFrame widget
         # TODO write code to reset game
         self.boardArray = []
 
-    def tryMove(self, newX, newY):
-        self.boardArray[newX][newY] = 1
+    def tryMove(self, y, x):
+        logic = GameLogic()
+        GameLogic.try_move(self.type, y - 1, x - 1)
         print(self.boardArray)
         return True
 
@@ -154,11 +158,26 @@ class Board(QFrame):  # base the board on a QFrame widget
 
                 # Exclude borders for label squares
                 if row > 0 and col > 0 and row < 7 and col < 7:
-
-                    painter.fillRect(0, 0, squareWidth, borderThickness, darkBrown)  # Top border
-                    painter.fillRect(0, 0, borderThickness, squareHeight, darkBrown)  # Left border
-                    painter.fillRect(squareWidth - borderThickness, 0, borderThickness, squareHeight, darkBrown)  # Right border
-                    painter.fillRect(0, squareHeight - borderThickness, squareWidth, borderThickness, darkBrown)  # Bottom border
+                    painter.fillRect(
+                        0, 0, squareWidth, borderThickness, darkBrown
+                    )  # Top border
+                    painter.fillRect(
+                        0, 0, borderThickness, squareHeight, darkBrown
+                    )  # Left border
+                    painter.fillRect(
+                        squareWidth - borderThickness,
+                        0,
+                        borderThickness,
+                        squareHeight,
+                        darkBrown,
+                    )  # Right border
+                    painter.fillRect(
+                        0,
+                        squareHeight - borderThickness,
+                        squareWidth,
+                        borderThickness,
+                        darkBrown,
+                    )  # Bottom border
 
                 # Add labels without border
                 if row == 0:
@@ -166,8 +185,12 @@ class Board(QFrame):  # base the board on a QFrame widget
                     painter.setFont(font)
                     painter.setPen(QColor(50, 70, 90))
 
-                    painter.drawText(borderThickness - (font.pointSize()//2), squareHeight//10 + font.pointSize(), text)
-                    
+                    painter.drawText(
+                        borderThickness - (font.pointSize() // 2),
+                        squareHeight // 10 + font.pointSize(),
+                        text,
+                    )
+
                 if col == 0:
                     text = row_labels[row]
                     painter.setFont(font)

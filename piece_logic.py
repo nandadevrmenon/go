@@ -55,13 +55,6 @@ class Piece(object):
 
         return neighbours
 
-    def has_all_nieghbours_of_type(self, type):
-        neighbours = self.get_neighbours()
-        for neighbour in neighbours:
-            if neighbour.type is not type:
-                return False
-        return True
-
     def add_to_group(self):
         # finds neighbouring groups to add itself to or creates a new group on its own
         neighbour_groups = []
@@ -91,6 +84,11 @@ class Piece(object):
         neighbours = self.get_neighbours()
         for piece in neighbours:
             piece.liberties = piece.liberties + 1
+
+    def decrement_neighbour_liberties(self):
+        neighbours = self.get_neighbours()
+        for piece in neighbours:
+            piece.liberties = piece.liberties - 1
 
     def place(self, type):
         self.type = type
