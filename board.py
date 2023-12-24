@@ -3,6 +3,8 @@ from PyQt6 import QtCore
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 
+from game_logic import GameLogic
+
 
 class Board(QFrame):  # base the board on a QFrame widget
     # signal sent when the timer is updated
@@ -10,6 +12,8 @@ class Board(QFrame):  # base the board on a QFrame widget
     clickLocationSignal = pyqtSignal(
         str
     )  # signal sent when there is a new click location
+
+    type = 1
 
     # TODO set the board width and height to be square
     boardWidth = 8  # board is 7 squares wide # TODO - DONE this needs updating
@@ -101,13 +105,13 @@ class Board(QFrame):  # base the board on a QFrame widget
         """this event is automatically called when the mouse is pressed"""
         painter = QPainter(self)
         clickPos = event.pos()
-        
+
         row = clickPos.x() // (self.height() // 7)
         col = clickPos.y() // (self.width() // 8)
         print("height = ", self.height(), self.width())
         print(row, col)
 
-        valid_move = self.tryMove(col + 1, row + 1)
+        valid_move = self.tryMove(col, row)
         if valid_move:
             self.drawPieces(painter)
         elif not valid_move:
@@ -120,8 +124,9 @@ class Board(QFrame):  # base the board on a QFrame widget
         # TODO write code to reset game
         self.boardArray = []
 
-    def tryMove(self, newX, newY):
-        self.boardArray[newX][newY] = 1
+    def tryMove(self, y, x):
+        logic = GameLogic()
+        GameLogic.try_move(self.type, y - 1, x - 1)
         print(self.boardArray)
         return True
 
@@ -160,8 +165,12 @@ class Board(QFrame):  # base the board on a QFrame widget
                     painter.setFont(font)
                     painter.setPen(QColor(50, 70, 90))
 
-                    painter.drawText(borderThickness - (font.pointSize()//2), squareHeight//10 + font.pointSize(), text)
-                    
+                    painter.drawText(
+                        borderThickness - (font.pointSize() // 2),
+                        squareHeight // 10 + font.pointSize(),
+                        text,
+                    )
+
                 if col == 0:
                     text = row_labels[row]
                     painter.setFont(font)

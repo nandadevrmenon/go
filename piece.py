@@ -62,27 +62,6 @@ class Piece(object):
                 return False
         return True
 
-    # def add_to_group(self):
-    #     # finds neighbouring groups to add itself to ir creates a new group on its own
-    #     neighbour_groups = []
-    #     neighbours = self.get_neighbours()
-    #     for piece in neighbours:
-    #         if (
-    #             piece.type == self.type
-    #             and piece.group is not None
-    #             and piece.group not in neighbour_groups
-    #         ):
-    #             neighbour_groups.append(piece.group)
-    #     if not neighbour_groups:
-    #         group = Group(self.board, self.all_groups, self)
-    #         return group
-    #     else:
-    #         if len(neighbour_groups) > 1:
-    #             for group in neighbour_groups[1:]:
-    #                 neighbour_groups[0].merge(group)
-    #         neighbour_groups[0].stones.append(self)
-    #         return neighbour_groups[0]
-
     def add_to_group(self):
         # finds neighbouring groups to add itself to or creates a new group on its own
         neighbour_groups = []
@@ -108,9 +87,18 @@ class Piece(object):
             self.group = neighbour_groups[0]
             return neighbour_groups[0]
 
+    def increment_neighbour_liberties(self):
+        neighbours = self.get_neighbours()
+        for piece in neighbours:
+            piece.liberties = piece.liberties + 1
+
+    def place(self, type):
+        self.type = type
+
     def remove(self):
         self.type = 0
         self.group = None
+        self.increment_neighbour_liberties()
 
     def __str__(self):
         res = " " + str(self.y) + str(self.x)
