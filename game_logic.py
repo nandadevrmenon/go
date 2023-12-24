@@ -164,6 +164,22 @@ class GameLogic:
     record_board_state()
 
 
+# logic = GameLogic()
+# board, groups = GameLogic.make_board_from_state(
+#     [
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0],
+#     ]
+# )
+
+# GameLogic.board = board
+# GameLogic.all_groups = groups
+# GameLogic.record_board_state()
 # black = True
 # while True:
 #     # Get row and column input
