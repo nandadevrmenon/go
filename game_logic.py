@@ -2,16 +2,7 @@ from piece import Piece
 
 
 class GameLogic:
-    turn = 0
-    board_states = []
-    board = []
-    all_groups = []
-
-    for i in range(7):
-        board.append([])
-        for j in range(7):
-            board[i].append(Piece(i, j, board, all_groups))
-
+    @staticmethod
     def try_move(type, y, x):
         board = GameLogic.board
         piece = board[y][x]
@@ -26,10 +17,15 @@ class GameLogic:
 
             added_piece = sample_board[y][x]
             if GameLogic.check_suicide_for(added_piece):
-                print("suicide")
+                print("suicide found ")
                 if GameLogic.check_captures_near(added_piece):
+                    if GameLogic.check_for_KO(sample_board):
+                        GameLogic.increment_neighbour_liberties(piece)
+                        piece.remove()
+                        return False
                     GameLogic.board = sample_board
                     GameLogic.all_groups = sample_board_groups
+                    GameLogic.record_board_state()
                     return True
                 GameLogic.increment_neighbour_liberties(piece)
                 piece.remove()
@@ -38,32 +34,29 @@ class GameLogic:
                 GameLogic.check_captures_near(added_piece)
                 GameLogic.board = sample_board
                 GameLogic.all_groups = sample_board_groups
+                GameLogic.record_board_state()
                 return True
-
         else:
-            if GameLogic.check_for_KO():
-                GameLogic.display_wrong_move()
-                return False
-            else:
-                piece.place(type)
-                GameLogic.decrement_neighbour_liberties(piece)
-                piece.add_to_group()
-                GameLogic.check_captures_near(piece)
-                return True
+            piece.place(type)
+            GameLogic.decrement_neighbour_liberties(piece)
+            piece.add_to_group()
+            GameLogic.check_captures_near(piece)
+            GameLogic.record_board_state()
+            return True
 
-        # check is theres a piece there
-        # check suicide
-        # no piece
-        # check liberties
-        # check KO
-
-        # add it to group
-
+    @staticmethod
     def display_wrong_move():
         print("Thats was a wrong move ")
 
-    def check_for_KO():
-        print("proint checking for KO")
+    @staticmethod
+    def check_for_KO(sample_board):
+        sample_board_state = GameLogic.get_board_state(sample_board)
+        if (
+            sample_board_state
+            == GameLogic.board_states[len(GameLogic.board_states) - 2]
+        ):
+            print("KO found")
+            return True
         return False
 
     # def remove_piece(piece):
@@ -74,31 +67,32 @@ class GameLogic:
         piece.type = 0
         piece.group = None
 
+    @staticmethod
     def decrement_neighbour_liberties(piece):
         neighbours = piece.get_neighbours()
         for piece in neighbours:
             piece.liberties = piece.liberties - 1
 
+    @staticmethod
     def increment_neighbour_liberties(piece):
         neighbours = piece.get_neighbours()
         for piece in neighbours:
             piece.liberties = piece.liberties + 1
 
+    @staticmethod
     def check_captures_near(piece):
         neighbours = piece.get_neighbours()
         groups = [piece.group for piece in neighbours if piece.group is not None]
         captured = False
         for group in groups:
             if not (group.check_for_life()):
-                print("group found dead")
+                print("group", str(group), " found dead")
                 group.remove()
                 captured = True
 
-            else:
-                print("group", str(group), "is alive")
-
         return captured
 
+    @staticmethod
     def check_suicide_for(piece):
         neighbours = piece.get_neighbours()
         groups = [piece.group for piece in neighbours if piece.group is not None]
@@ -109,6 +103,7 @@ class GameLogic:
             return True
         return False
 
+    @staticmethod
     def print_board(board):
         for row in board:
             for element in row:
@@ -122,6 +117,7 @@ class GameLogic:
         print("*****GROUPS*****")
         print(str(GameLogic.all_groups))
 
+    @staticmethod
     def get_board_state(board):
         state = []
         for row in board:
@@ -131,6 +127,7 @@ class GameLogic:
             state.append(state_row)
         return state
 
+    @staticmethod
     def make_board_from_state(state):
         new_board = []
         new_groups = []
@@ -149,30 +146,30 @@ class GameLogic:
 
         return (new_board, new_groups)
 
-    # for groups, check how to know whcih group a piece is in. Then for every cpature you will have a function that
+    @staticmethod
+    def record_board_state():
+        GameLogic.board_states.append(GameLogic.get_board_state(GameLogic.board))
+
+    # main static variable and static class instantiation
+    turn = 0
+    board_states = [None]
+    board = []
+    all_groups = []
+
+    for i in range(7):
+        board.append([])
+        for j in range(7):
+            board[i].append(Piece(i, j, board, all_groups))
+
+    record_board_state()
 
 
-logic = GameLogic()
-board, groups = GameLogic.make_board_from_state(
-    [
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 2, 0, 0, 0],
-        [0, 0, 2, 1, 2, 0, 0],
-        [0, 2, 1, 0, 1, 2, 0],
-        [0, 0, 2, 1, 2, 0, 0],
-        [0, 0, 0, 2, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-    ]
-)
+# black = True
+# while True:
+#     # Get row and column input
+#     row_input = int(input("Enter y value the row()"))
+#     column_input = int(input("Enter x value which is the column "))
 
-GameLogic.board = board
-GameLogic.all_groups = groups
-black = True
-while True:
-    # Get row and column input
-    row_input = int(input("Enter y value the row()"))
-    column_input = int(input("Enter x value which is the column "))
-
-    if GameLogic.try_move(1 if black else 2, row_input, column_input):
-        black = not black
-    GameLogic.print_board(GameLogic.board)
+#     if GameLogic.try_move(1 if black else 2, row_input, column_input):
+#         black = not black
+#     GameLogic.print_board(GameLogic.board)
