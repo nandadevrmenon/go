@@ -61,7 +61,7 @@ class GameLogic:
         groups = [piece.group for piece in neighbours if piece.group is not None]
         captured = False
         for group in groups:
-            if not (group.check_for_life()):
+            if group.stones[0].type != piece.type and not (group.check_for_life()):
                 print("group", str(group), " found dead")
                 group.remove()
                 captured = True
@@ -110,7 +110,13 @@ class GameLogic:
 
     @staticmethod
     def record_board_state():
+        # if GameLogic.turn < len(GameLogic.board_states):
+        #     GameLogic.board_states = GameLogic.board_states[: GameLogic.turn]
+        #     GameLogic.board_states.append(GameLogic.get_board_state(GameLogic.board))
+        #     GameLogic.turn = len(GameLogic.board_states)
+        # else:
         GameLogic.board_states.append(GameLogic.get_board_state(GameLogic.board))
+        GameLogic.turn += 1
 
     @staticmethod
     def reset_board():
@@ -124,6 +130,27 @@ class GameLogic:
                 board[i].append(Piece(i, j, board, all_groups))
 
         board_states.append(GameLogic.get_board_state(board))
+
+    @staticmethod
+    def undo_board():
+        print("turn number", GameLogic.turn)
+        if GameLogic.turn > 2:
+            GameLogic.turn -= 1
+            prev_board, prev_groups = GameLogic.make_board_from_state(
+                GameLogic.board_states[GameLogic.turn - 1]
+            )
+            GameLogic.board = prev_board
+            GameLogic.all_groups = prev_groups
+
+    def redo_board():
+        print("turn number", GameLogic.turn)
+        if GameLogic.turn < len(GameLogic.board_states):
+            GameLogic.turn += 1
+            next_board, next_groups = GameLogic.make_board_from_state(
+                GameLogic.board_states[GameLogic.turn - 1]
+            )
+            GameLogic.board = next_board
+            GameLogic.all_groups = next_groups
 
     @staticmethod
     def print_board(board):
@@ -151,6 +178,7 @@ class GameLogic:
             board[i].append(Piece(i, j, board, all_groups))
 
     board_states.append(get_board_state(board))
+    turn = len(board_states)
 
 
 if __name__ == "__main__":
@@ -174,7 +202,11 @@ if __name__ == "__main__":
         # Get row and column input
         row_input = int(input("Enter y value the row()"))
         column_input = int(input("Enter x value which is the column "))
-
-        if GameLogic.try_move(1 if black else 2, row_input, column_input):
+        undo_input = str(input("Undo Redo ?"))
+        if undo_input == "u":
+            GameLogic.undo_board()
+        elif undo_input == "r":
+            GameLogic.redo_board()
+        elif GameLogic.try_move(1 if black else 2, row_input, column_input):
             black = not black
         GameLogic.print_board(GameLogic.board)
