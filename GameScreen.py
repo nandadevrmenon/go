@@ -24,17 +24,17 @@ class GameScreen(QMainWindow):
 
         self.player1 = {"name": p1Name, "score": [12, 2], "timer": QTimer()}
         self.player2 = {"name": p2Name, "score": [1, 78], "timer": QTimer()}
-        self.currentPlayer = self.player1
+        self.current_player = self.player1
         self.is_game_running = True
         self.is_game_started = False
-        self.game_logic = GameLogic()
+        self.game_logic = GameLogic(self.player1, self.player2, self.current_player)
 
         self.passed = False
 
         game_state = [
             self.player1,
             self.player2,
-            self.currentPlayer,
+            self.current_player,
             self.is_game_started,
             self.is_game_running,
             self.game_logic,
@@ -143,10 +143,11 @@ class GameScreen(QMainWindow):
         # then redraw an empty board ( or basically call theupdate board method. that basically redarws theboard according to the static vairblae board in the GameLogic class)
 
     def undo_board():
-        GamseLogic.undo_board()
+        GameLogic.undo_board()
+        # redraw board()
 
     def redo_board():
-        pass
+        GameLogic.redo_board()
 
     def redraw_board(self):
         pass
