@@ -27,7 +27,7 @@ class GameScreen(QMainWindow):
         self.current_player = self.player1
         self.is_game_running = True
         self.is_game_started = False
-        self.game_logic = GameLogic(self.player1, self.player2, self.current_player)
+        self.game_logic = GameLogic(self.player1, self.player2)
 
         self.passed = False
 
@@ -108,6 +108,8 @@ class GameScreen(QMainWindow):
             True,
         )
 
+        indicate_player_turn(self)
+
         # define and adjust main layout
         central_widget = QWidget()
         main_layout = QHBoxLayout()
@@ -137,17 +139,20 @@ class GameScreen(QMainWindow):
         self.p1_side.reset_timer()
         self.p2_side.update_score()
         self.p2_side.reset_timer()
+        self.indicate_player_turn()
 
         self.redraw_board()
 
         # then redraw an empty board ( or basically call theupdate board method. that basically redarws theboard according to the static vairblae board in the GameLogic class)
 
-    def undo_board():
+    def undo_board(self):
         GameLogic.undo_board()
+        indicate_player_turn(self)
         # redraw board()
 
-    def redo_board():
+    def redo_board(self):
         GameLogic.redo_board()
+        indicate_player_turn(self)  
 
     def redraw_board(self):
         pass
@@ -155,9 +160,16 @@ class GameScreen(QMainWindow):
     def end_game(self):
         pass
 
-
 def do_nothing():
     pass
+
+def indicate_player_turn(self):
+    if self.current_player == self.player1:
+        self.p1_side.turn_label.setHidden(False)
+        self.p2_side.turn_label.setHidden(True)
+    if self.current_player == self.player2:
+        self.p1_side.turn_label.setHidden(True)
+        self.p2_side.turn_label.setHidden(False)
 
 
 if __name__ == "__main__":
