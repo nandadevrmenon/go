@@ -29,6 +29,8 @@ class GameScreen(QMainWindow):
         self.is_game_started = False
         self.game_logic = GameLogic()
 
+        self.passed = False
+
         game_state = [
             self.player1,
             self.player2,
@@ -71,9 +73,9 @@ class GameScreen(QMainWindow):
         button_dock.setLayout(button_dock_layout)
         button_dock.setFixedHeight(100)
 
-        undo_button = PrimaryButton("Undo", do_nothing)
-        redo_button = PrimaryButton("Redo", do_nothing)
-        pass_button = PrimaryButton("Pass", do_nothing)
+        undo_button = PrimaryButton("Undo", self.undo_board)
+        redo_button = PrimaryButton("Redo", self.redo_board)
+        pass_button = PrimaryButton("Pass", self.check_passes)
         resign_button = PrimaryButton("Resign", do_nothing)
         pause_button = PrimaryButton("Pause", do_nothing)
         reset_button = PrimaryButton("Reset", self.reset_game)
@@ -118,6 +120,13 @@ class GameScreen(QMainWindow):
         self.setCentralWidget(central_widget)
         central_widget.setLayout(main_layout)
 
+    def check_passes(self):
+        if self.passed:
+            self.reset_game()
+            self.end_game()
+        else:
+            self.passed = True
+
     def reset_game(self):
         print("baord being reset")
         self.game_logic.reset_board()
@@ -128,14 +137,25 @@ class GameScreen(QMainWindow):
         self.p1_side.reset_timer()
         self.p2_side.update_score()
         self.p2_side.reset_timer()
+
+        self.redraw_board()
+
         # then redraw an empty board ( or basically call theupdate board method. that basically redarws theboard according to the static vairblae board in the GameLogic class)
+
+    def undo_board():
+        GamseLogic.undo_board()
+
+    def redo_board():
+        pass
+
+    def redraw_board(self):
+        pass
+
+    def end_game(self):
+        pass
 
 
 def do_nothing():
-    pass
-
-
-def redraw_board():
     pass
 
 
