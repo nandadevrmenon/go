@@ -18,7 +18,9 @@ class GameLogic:
         GameLogic.current_player = player1
         GameLogic.temp_captured = 0
 
-        GameLogic.board_states = [None]
+        GameLogic.board_states = [
+            None,
+        ]
         GameLogic.board = []
         GameLogic.all_groups = []
         GameLogic.score_states = [None, {"p1": [0, 0], "p2": [0, 0]}]
@@ -31,7 +33,7 @@ class GameLogic:
                 )
 
         GameLogic.board_states.append(GameLogic.get_board_state(GameLogic.board))
-        turn = len(GameLogic.board_states)
+        GameLogic.turn = len(GameLogic.board_states)
 
     @staticmethod
     def try_move(type, y, x):
@@ -79,6 +81,9 @@ class GameLogic:
     def update_board_scores_turn():
         GameLogic.update_player_scores()
         GameLogic.record_board_state()
+        GameLogic.flip_turn()
+
+    def flip_turn():
         GameLogic.current_player = (
             GameLogic.player1
             if GameLogic.current_player is GameLogic.player2
@@ -102,10 +107,12 @@ class GameLogic:
         groups = [piece.group for piece in neighbours if piece.group is not None]
         captured = False
         for group in groups:
-            if group.stones[0].type != piece.type and not (group.check_for_life()):
-                print("group", str(group), " found dead")
+            if (
+                group.stones
+                and group.stones[0].type != piece.type
+                and not (group.check_for_life())
+            ):
                 removed = group.remove()
-                print("remoeved", removed)
                 GameLogic.temp_captured += removed
                 captured = True
 
@@ -113,7 +120,18 @@ class GameLogic:
 
     @staticmethod
     def get_score_state():
-        pass
+        p1 = GameLogic.player1
+        p2 = GameLogic.player2
+        return {
+            "p1": [p1["score"][0], p1["score"][1]],
+            "p2": [p2["score"][0], p2["score"][1]],
+        }
+
+    def set_scores_using(state):
+        GameLogic.player1["score"][0] = state["p1"][0]
+        GameLogic.player1["score"][1] = state["p1"][1]
+        GameLogic.player2["score"][0] = state["p2"][0]
+        GameLogic.player2["score"][1] = state["p2"][1]
 
     @staticmethod
     def update_player_scores():
@@ -121,8 +139,6 @@ class GameLogic:
             0
         ] += 1  # piece has been placed so territory increased by 1
         GameLogic.current_player["score"][1] += GameLogic.temp_captured
-
-        print(GameLogic.current_player is GameLogic.player1)
         other_player = (
             GameLogic.player2
             if GameLogic.current_player is GameLogic.player1
@@ -177,10 +193,10 @@ class GameLogic:
         if GameLogic.turn < len(GameLogic.board_states):
             GameLogic.board_states = GameLogic.board_states[: GameLogic.turn]
             GameLogic.board_states.append(GameLogic.get_board_state(GameLogic.board))
-            GameLogic.turn = len(GameLogic.board_states)
 
             GameLogic.score_states = GameLogic.score_states[: GameLogic.turn]
             GameLogic.score_states.append(GameLogic.get_score_state())
+            GameLogic.turn = len(GameLogic.board_states)
         else:
             GameLogic.board_states.append(GameLogic.get_board_state(GameLogic.board))
             GameLogic.score_states.append(GameLogic.get_score_state())
@@ -188,37 +204,43 @@ class GameLogic:
 
     @staticmethod
     def reset_board():
-        board_states = [None]
-        board = []
-        all_groups = []
-
+        GameLogic.board_states = [None]
+        GameLogic.board = []
+        GameLogic.all_groups = []
+        GameLogic.current_player = GameLogic.player1
         for i in range(7):
-            board.append([])
+            GameLogic.board.append([])
             for j in range(7):
-                board[i].append(Piece(i, j, board, all_groups))
+                GameLogic.board[i].append(
+                    Piece(i, j, GameLogic.board_states, GameLogic.all_groups)
+                )
 
-        board_states.append(GameLogic.get_board_state(board))
+        GameLogic.board_states.append(GameLogic.get_board_state(GameLogic.board))
 
     @staticmethod
     def undo_board():
-        print("turn number", GameLogic.turn)
         if GameLogic.turn > 2:
             GameLogic.turn -= 1
             prev_board, prev_groups = GameLogic.make_board_from_state(
                 GameLogic.board_states[GameLogic.turn - 1]
             )
+            prev_score_state = GameLogic.score_states[GameLogic.turn - 1]
+            GameLogic.set_scores_using(prev_score_state)
             GameLogic.board = prev_board
             GameLogic.all_groups = prev_groups
+            GameLogic.flip_turn()
 
     def redo_board():
-        print("turn number", GameLogic.turn)
         if GameLogic.turn < len(GameLogic.board_states):
-            GameLogic.turn += 1
             next_board, next_groups = GameLogic.make_board_from_state(
-                GameLogic.board_states[GameLogic.turn - 1]
+                GameLogic.board_states[GameLogic.turn]
             )
+            next_score_state = GameLogic.score_states[GameLogic.turn]
+            GameLogic.set_scores_using(next_score_state)
             GameLogic.board = next_board
             GameLogic.all_groups = next_groups
+            GameLogic.flip_turn()
+            GameLogic.turn += 1
 
     @staticmethod
     def print_board(board):
@@ -239,8 +261,8 @@ class GameLogic:
 
 
 if __name__ == "__main__":
-    player1 = {"name": "Joojas", "score": [2, 0], "timer": "asd"}
-    player2 = {"name": "asd", "score": [4, 0], "timer": "asd"}
+    player1 = {"name": "Joojas", "score": [0, 0], "timer": "asd"}
+    player2 = {"name": "asd", "score": [0, 0], "timer": "asd"}
     current_player = player1
     logic = GameLogic(player1, player2)
     # board, groups = GameLogic.make_board_from_state(
@@ -255,21 +277,21 @@ if __name__ == "__main__":
     #     ]
     # )
 
-    board, groups = GameLogic.make_board_from_state(
-        [
-            [0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 2, 2],
-            [0, 0, 0, 0, 2, 0, 1],
-            [0, 0, 0, 0, 0, 2, 1],
-        ]
-    )
+    # board, groups = GameLogic.make_board_from_state(
+    #     [
+    #         [0, 0, 0, 0, 0, 0, 0],
+    #         [0, 0, 0, 0, 0, 0, 0],
+    #         [0, 0, 0, 0, 0, 0, 0],
+    #         [0, 0, 0, 0, 0, 0, 0],
+    #         [0, 0, 0, 0, 0, 0, 0],
+    #         [0, 0, 0, 0, 0, 0, 0],
+    #         [0, 0, 0, 0, 0, 0, 0],
+    #     ]
+    # )
 
-    GameLogic.board = board
-    GameLogic.all_groups = groups
-    GameLogic.record_board_state()
+    # GameLogic.board = board
+    # GameLogic.all_groups = groups
+    # GameLogic.record_board_state()
     black = True
     while True:
         # Get row and column input
@@ -283,3 +305,5 @@ if __name__ == "__main__":
         elif GameLogic.try_move(1 if black else 2, row_input, column_input):
             black = not black
         GameLogic.print_board(GameLogic.board)
+        print(len(GameLogic.board_states), len(GameLogic.score_states), GameLogic.turn)
+        print(str(GameLogic.score_states))
