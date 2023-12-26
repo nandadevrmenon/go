@@ -27,6 +27,10 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.animation_finished = False
         self.animation_timer.start(40)
 
+        self.x = None
+        self.y = None
+        self.move_validity = None
+
     def initBoard(self):
         """initiates board"""
 
@@ -35,8 +39,8 @@ class Board(QFrame):  # base the board on a QFrame widget
 
         self.boardArray = (
             [7, 7, 7, 7, 7, 7, 7, 7, 7],
-            [7, 0, 0, 0, 2, 2, 0, 0, 7],
-            [7, 0, 0, 1, 0, 0, 0, 0, 7],
+            [7, 0, 0, 0, 0, 0, 0, 0, 7],
+            [7, 0, 0, 0, 0, 0, 0, 0, 7],
             [7, 0, 0, 0, 0, 0, 0, 0, 7],
             [7, 0, 0, 0, 0, 0, 0, 0, 7],
             [7, 0, 0, 0, 0, 0, 0, 0, 7],
@@ -85,7 +89,8 @@ class Board(QFrame):  # base the board on a QFrame widget
         painter = QPainter(self)
         self.drawBoardSquares(painter)
         self.drawPieces(painter)
-        self.animatePieces(painter, 1,4,True)
+        GameLogic
+        # self.animatePieces(painter)
 
     def mousePressEvent(self, event):
         """this event is automatically called when the mouse is pressed"""
@@ -96,15 +101,7 @@ class Board(QFrame):  # base the board on a QFrame widget
         print("coord = ", clickPos.x(), clickPos.y())
         print(row, col)
 
-        valid_move = self.try_move(col, row)
-        if valid_move:
-            if GameLogic.current_player == GameLogic.player1:
-                self.boardArray[col + 1][row + 1] = 1
-            else:
-                self.boardArray[col + 1][row + 1] = 2
-
-        self.animatePieces(row, col, valid_move)
-        self.update()
+        self.move_validity = self.try_move(col, row)
 
     def drawBoardSquares(self, painter):
         """draw all the square on the board"""
@@ -183,16 +180,16 @@ class Board(QFrame):  # base the board on a QFrame widget
     def drawPieces(self, painter):
         """draw the pieces on the board"""
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        for row in range(0, len(self.boardArray)):
-            for col in range(0, len(self.boardArray[0])):
+        for row in range(0, len(GameLogic.board)):
+            for col in range(0, len(GameLogic.board[0])):
                 painter.save()
                 painter.translate(col * self.squareWidth(), row * self.squareHeight())
 
                 # TODO - DONE draw some pieces as ellipses,  and set the painter brush to the correct color
-                if self.boardArray[row][col] == 1:  # Black stone
+                if GameLogic.board[row][col] == 1:  # Black stone
                     # Set brush color to black
                     pieceColor = QColor(0, 0, 0)
-                elif self.boardArray[row][col] == 2:  # White stone
+                elif GameLogic.board[row][col] == 2:  # White stone
                     # Set brush color to white
                     pieceColor = QColor(255, 255, 255)
                 else:
@@ -208,22 +205,36 @@ class Board(QFrame):  # base the board on a QFrame widget
                 painter.drawEllipse(center, radius, radius)
                 painter.restore()
 
-    def animatePieces(self,painter, row, col, valid_move):
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        # painter.translate(col * self.squareWidth(), row * self.squareHeight())
-        if self.boardArray[row][col] == 1:  # Black stone
-            pieceColor = QColor(0, 0, 0)  # Set brush color to black
-            # stone_image = black_stone
-        elif self.boardArray[row][col] == 2:  # White stone
-            # Set brush color to white
-            pieceColor = QColor(255, 255, 255)
+    def animatePieces(self, painter):
+        row = self.y
+        col = self.x
+        valid_move = self.move_validity
+        print(self.x, self.y, self.move_validity)
+        if valid_move is None or (self.x is None and self.y is None):
+            pass
+        elif valid_move:
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+            # painter.translate(col * self.squareWidth(), row * self.squareHeight())
+            if GameLogic.board[row][col] == 1:  # Black stone
+                pieceColor = QColor(0, 0, 0)  # Set brush color to black
+                # stone_image = black_stone
+            elif GameLogic.board[row][col] == 2:  # White stone
+                # Set brush color to white
+                pieceColor = QColor(255, 255, 255)
+            else:
+                painter.restore()
+            # Draw the piece
+            painter.setBrush(pieceColor)
+            painter.drawEllipse(
+                QPoint(col * int(self.squareWidth()), row * int(self.squareHeight())),
+                self.animation_radius,
+                self.animation_radius,
+            )
+            print("Animate pieces ", row, col)
         else:
-            painter.restore()
-        # Draw the piece
-        painter.setBrush(QColor(255, 0, 255))
-        painter.drawEllipse(QPoint(col * int(self.squareWidth()), row * int(self.squareHeight())), self.animation_radius, self.animation_radius)
-        print("Animate pieces ", row, col)
-        
+            # show red flash
+            pass
+
         # else drawmakeEllipse Opacity
 
     def updateAnimation(self):
@@ -236,10 +247,9 @@ class Board(QFrame):  # base the board on a QFrame widget
 
                 self.animation_timer.stop()
 
-
             # Trigger widget repaint
         self.update()
-    
+
     def get_statliches_font(self):
         font_path = QtCore.QDir.currentPath() + "/fonts/statliches.ttf"
         font_id = QFontDatabase.addApplicationFont(font_path)  # load font

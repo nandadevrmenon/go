@@ -78,13 +78,17 @@ class SideBar(QWidget):
         self.turn_label.setObjectName("turn_label")
         self.turn_label.setFont(statliches_heading1)
         self.turn_label.setAlignment(align_left)
-        self.turn_label.setStyleSheet(f"color:{colors['orange']}; font-size:24px; padding-left: 8px;")
+        self.turn_label.setStyleSheet(
+            f"color:{colors['orange']}; font-size:24px; padding-left: 8px;"
+        )
         self.turn_label.setHidden(True)
-        self.animate_text_timer = QTimer(self)      # connects a timer for the color change intevals
+        self.animate_text_timer = QTimer(
+            self
+        )  # connects a timer for the color change intevals
         self.animate_text_timer.timeout.connect(self.animate_turn_text)
         self.animate_text_timer.start(1000)
         self.colorFlag = False
-        
+
         # label for player information
         self.player_label = QLabel(self.player_name)
         self.player_label.setFont(statliches_heading1)
@@ -214,7 +218,6 @@ class SideBar(QWidget):
             self.timer.stop()
             self.swap_player_turn()
 
-
     def reset_timer(self):
         self.timer.stop()
         self.timer_counter = 120
@@ -252,21 +255,24 @@ class SideBar(QWidget):
 
     def animate_turn_text(self):
         """
-            sets the color to orange when color flag is true; white when false. 
-            connected to a timer interval, it will create a "flashing" effect
+        sets the color to orange when color flag is true; white when false.
+        connected to a timer interval, it will create a "flashing" effect
         """
         if self.colorFlag:
-            self.turn_label.setStyleSheet(f"color:{colors['orange']}; font-size:24px; padding-left: 8px;")
+            self.turn_label.setStyleSheet(
+                f"color:{colors['orange']}; font-size:24px; padding-left: 8px;"
+            )
         else:
-            self.turn_label.setStyleSheet(f"color:{colors['white']}; font-size:24px; padding-left: 8px;")
+            self.turn_label.setStyleSheet(
+                f"color:{colors['white']}; font-size:24px; padding-left: 8px;"
+            )
         self.colorFlag = not self.colorFlag
 
     def swap_player_turn(self):
         """
-            swaps the current player
+        swaps the current player
         """
         if self.current_player == self.player1:
             self.current_player = self.player2
         if self.current_player == self.player2:
             self.current_player = self.player1
-
