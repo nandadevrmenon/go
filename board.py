@@ -48,7 +48,7 @@ class Board(QFrame):  # base the board on a QFrame widget
             [7, 0, 0, 0, 0, 0, 0, 0, 7],
             [7, 7, 7, 7, 7, 7, 7, 7, 7],
         )  # TODO - DONE create a 2d int/Piece array to store the state of the game
-        self.printBoardArray()  # TODO - DONE uncomment this method after creating the array above
+        # self.printBoardArray()  # TODO - DONE uncomment this method after creating the array above
 
     def printBoardArray(self):
         """prints the boardArray to console in an attractive way"""
@@ -98,8 +98,8 @@ class Board(QFrame):  # base the board on a QFrame widget
 
         row = clickPos.x() // (self.height() // 7)
         col = clickPos.y() // (self.width() // 7)
-        print("coord = ", clickPos.x(), clickPos.y())
-        print(row, col)
+        # print("coord = ", clickPos.x(), clickPos.y())
+        # print(row, col)
 
         self.move_validity = self.try_move(col, row)
         self.update()
@@ -212,7 +212,7 @@ class Board(QFrame):  # base the board on a QFrame widget
         row = self.y
         col = self.x
         valid_move = self.move_validity
-        print(self.x, self.y, self.move_validity)
+        # print(self.x, self.y, self.move_validity)
         if valid_move is None or (self.x is None and self.y is None):
             pass
         elif valid_move:
@@ -233,7 +233,7 @@ class Board(QFrame):  # base the board on a QFrame widget
                 self.animation_radius,
                 self.animation_radius,
             )
-            print("Animate pieces ", row, col)
+            # print("Animate pieces ", row, col)
         else:
             # show red flash
             pass
@@ -241,7 +241,7 @@ class Board(QFrame):  # base the board on a QFrame widget
         # else drawmakeEllipse Opacity
 
     def updateAnimation(self):
-        print("update Animation")
+        # print("update Animation")
         if not self.animation_finished:
             self.animation_radius -= 1
             if self.animation_radius == int((self.squareWidth() - 2) / 2.2):
