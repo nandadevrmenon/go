@@ -102,6 +102,7 @@ class Board(QFrame):  # base the board on a QFrame widget
         print(row, col)
 
         self.move_validity = self.try_move(col, row)
+        self.update()
 
     def drawBoardSquares(self, painter):
         """draw all the square on the board"""
@@ -186,10 +187,10 @@ class Board(QFrame):  # base the board on a QFrame widget
                 painter.translate(col * self.squareWidth(), row * self.squareHeight())
 
                 # TODO - DONE draw some pieces as ellipses,  and set the painter brush to the correct color
-                if GameLogic.board[row][col] == 1:  # Black stone
+                if GameLogic.board[row][col].type == 1:  # Black stone
                     # Set brush color to black
                     pieceColor = QColor(0, 0, 0)
-                elif GameLogic.board[row][col] == 2:  # White stone
+                elif GameLogic.board[row][col].type == 2:  # White stone
                     # Set brush color to white
                     pieceColor = QColor(255, 255, 255)
                 else:

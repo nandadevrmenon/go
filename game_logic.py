@@ -33,6 +33,22 @@ class GameLogic:
                 )
 
         GameLogic.board_states.append(GameLogic.get_board_state(GameLogic.board))
+        board, groups = GameLogic.make_board_from_state(
+            [
+                [0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 1, 2, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0],
+            ]
+        )
+
+        GameLogic.board = board
+        GameLogic.all_groups = groups
+        GameLogic.record_board_state()
+
         GameLogic.turn = len(GameLogic.board_states)
 
     @staticmethod
