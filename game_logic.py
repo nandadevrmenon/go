@@ -1,4 +1,5 @@
 from piece_logic import Piece
+from PyQt6.QtCore import Qt, QTimer
 
 
 class GameLogic:
@@ -12,44 +13,29 @@ class GameLogic:
     turn = 0
     temp_captured = 0
 
-    def __init__(self, player1, player2):
-        GameLogic.player1 = player1
-        GameLogic.player2 = player2
-        GameLogic.current_player = player1
-        GameLogic.temp_captured = 0
+    def __init__(self, p1Name=None, p2Name=None):
+        if p1Name is not None and p2Name is not None:
+            GameLogic.player1 = {"name": p1Name, "score": [12, 2], "timer": QTimer()}
+            GameLogic.player2 = {"name": p2Name, "score": [1, 78], "timer": QTimer()}
+            GameLogic.current_player = GameLogic.player1
+            GameLogic.temp_captured = 0
 
-        GameLogic.board_states = [
-            None,
-        ]
-        GameLogic.board = []
-        GameLogic.all_groups = []
-        GameLogic.score_states = [None, {"p1": [0, 0], "p2": [0, 0]}]
-
-        for i in range(7):
-            GameLogic.board.append([])
-            for j in range(7):
-                GameLogic.board[i].append(
-                    Piece(i, j, GameLogic.board, GameLogic.all_groups)
-                )
-
-        GameLogic.board_states.append(GameLogic.get_board_state(GameLogic.board))
-        board, groups = GameLogic.make_board_from_state(
-            [
-                [0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 1, 2, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0],
+            GameLogic.board_states = [
+                None,
             ]
-        )
+            GameLogic.board = []
+            GameLogic.all_groups = []
+            GameLogic.score_states = [None, {"p1": [0, 0], "p2": [0, 0]}]
 
-        GameLogic.board = board
-        GameLogic.all_groups = groups
-        GameLogic.record_board_state()
+            for i in range(7):
+                GameLogic.board.append([])
+                for j in range(7):
+                    GameLogic.board[i].append(
+                        Piece(i, j, GameLogic.board, GameLogic.all_groups)
+                    )
+            GameLogic.board_states.append(GameLogic.get_board_state(GameLogic.board))
+            GameLogic.turn = len(GameLogic.board_states)
 
-        GameLogic.turn = len(GameLogic.board_states)
 
     @staticmethod
     def try_move(type, y, x):
@@ -277,10 +263,7 @@ class GameLogic:
 
 
 if __name__ == "__main__":
-    player1 = {"name": "Joojas", "score": [0, 0], "timer": "asd"}
-    player2 = {"name": "asd", "score": [0, 0], "timer": "asd"}
-    current_player = player1
-    logic = GameLogic(player1, player2)
+    logic = GameLogic("hello", "ruh")
     # board, groups = GameLogic.make_board_from_state(
     #     [
     #         [0, 0, 0, 0, 0, 0, 0],
