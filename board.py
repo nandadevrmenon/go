@@ -88,6 +88,7 @@ class Board(QFrame):  # base the board on a QFrame widget
     def paintEvent(self, event):
         """paints the board and the pieces of the game"""
         painter = QPainter(self)
+        painter.setPen(QPen(QColor(0,0,0,0)))
         self.drawBoardSquares(painter)
         self.drawPieces(painter)
         self.animatePieces(painter)
@@ -235,7 +236,7 @@ class Board(QFrame):  # base the board on a QFrame widget
             pass
         elif self.move_validity:
             print(GameLogic.board[row][col].type)
-            painter.translate(col * self.squareWidth(), row * self.squareHeight())
+            # painter.translate(col * self.squareWidth(), row * self.squareHeight())
             if GameLogic.board[row][col].type == 1:  # Black stone
                 pieceColor = QColor(0, 0, 0)  # Set brush color to black
                 # stone_image = black_stone
@@ -247,7 +248,7 @@ class Board(QFrame):  # base the board on a QFrame widget
             # Draw the piece
             painter.setBrush(pieceColor)
             painter.drawEllipse(
-                QPoint(col * int(self.squareWidth()), row * int(self.squareHeight())),
+                QPoint((col + 1) * int(self.squareWidth()), (row + 1) * int(self.squareHeight())),
                 self.animation_radius,
                 self.animation_radius,
             )
