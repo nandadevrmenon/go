@@ -102,17 +102,19 @@ class Board(QFrame):  # base the board on a QFrame widget
         row = clickPos.x() // (self.height() // 7)
         col = clickPos.y() // (self.width() // 7)
         pieceType = 1 if GameLogic.current_player == GameLogic.player1 else 2
-        # self.move_validity = GameLogic.try_move(pieceType, col, row) # how should this try move should be
-        self.move_validity = True
+        self.move_validity = GameLogic.try_move(
+            pieceType, col, row
+        )  # how should this try move should be
+
         self.x = row
         self.y = col
 
-        #timer for animation
+        # timer for animation
         self.animation_timer = QTimer(self)
         self.animation_timer.timeout.connect(self.updateAnimation)
         if self.move_validity:  # valid move animation
             self.animation_radius = int((self.squareWidth() - 2) / 2.2) + 10
-        else:                   #invalid move animation
+        else:  # invalid move animation
             self.animation_radius = int((self.squareWidth() - 2) / 2.2)
             self.opacity = 1
         self.animation_finished = False
@@ -224,20 +226,20 @@ class Board(QFrame):  # base the board on a QFrame widget
                 painter.restore()
 
     def animatePieces(self, painter):
-        col = self.y
-        row = self.x
+        row = self.y
+        col = self.x
         print(self.x, self.y)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         # print(self.x, self.y, self.move_validity)
         if self.move_validity is None or (self.x is None and self.y is None):
             pass
         elif self.move_validity:
-            print(GameLogic.board[col][row].type)
+            print(GameLogic.board[row][col].type)
             painter.translate(col * self.squareWidth(), row * self.squareHeight())
-            if GameLogic.board[col][row].type == 1:  # Black stone
+            if GameLogic.board[row][col].type == 1:  # Black stone
                 pieceColor = QColor(0, 0, 0)  # Set brush color to black
                 # stone_image = black_stone
-            elif GameLogic.board[col][row].type == 2:  # White stone
+            elif GameLogic.board[row][col].type == 2:  # White stone
                 # Set brush color to white
                 pieceColor = QColor(255, 255, 255)
             else:
@@ -255,7 +257,14 @@ class Board(QFrame):  # base the board on a QFrame widget
             # invalid move - red flash
             color = QColor(255, 0, 0, int(self.opacity * 255))
             painter.setBrush(color)
-            painter.drawEllipse(QPoint((col + 1) * int(self.squareWidth()), (row + 1) * int(self.squareHeight())), self.animation_radius, self.animation_radius)
+            painter.drawEllipse(
+                QPoint(
+                    (col + 1) * int(self.squareWidth()),
+                    (row + 1) * int(self.squareHeight()),
+                ),
+                self.animation_radius,
+                self.animation_radius,
+            )
 
     def updateAnimation(self):
         if self.move_validity:
