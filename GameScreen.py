@@ -67,7 +67,7 @@ class GameScreen(QMainWindow):
         undo_button = PrimaryButton("Undo", self.undo_board)
         redo_button = PrimaryButton("Redo", self.redo_board)
         pass_button = PrimaryButton("Pass", self.check_passes)
-        resign_button = PrimaryButton("Resign", do_nothing)
+        resign_button = PrimaryButton("Resign", self.resign_from_game)
         pause_button = PrimaryButton("Pause", do_nothing)
         reset_button = PrimaryButton("Reset", self.reset_game)
 
@@ -113,10 +113,11 @@ class GameScreen(QMainWindow):
 
     def check_passes(self):
         if self.passed:
-            self.reset_game()
             self.end_game()
         else:
+            GameLogic.flip_turn()
             self.passed = True
+            self.switch_timers()
 
     def reset_game(self):
         print("baord being reset")
@@ -131,8 +132,6 @@ class GameScreen(QMainWindow):
         self.p1_side.default_turn_animation()
         self.p2_side.default_turn_animation()
 
-        # show indication for the player of the round
-
         self.redraw_board()
 
     def undo_board(self):
@@ -145,6 +144,10 @@ class GameScreen(QMainWindow):
             self.switch_timers()
             self.redraw_board()
 
+    def resign_from_game(self):
+        # show which plyer lost in the Reisgn dialog and thats the end of it .
+        pass
+
     def try_move(self, y, x):
         try:
             type = 1 if GameLogic.current_player is GameLogic.player1 else 2
@@ -154,11 +157,14 @@ class GameScreen(QMainWindow):
             self.p1_side.update_score()
             self.p2_side.update_score()
             self.switch_timers()
+            self.passed = False
 
     def redraw_board(self):
         self.board.update()
 
     def end_game(self):
+        # FLORRYN
+        # call the game end dialogue and edit it so that it calculated the scores and displays it tot he suer. you might have to change the colours as well.
         pass
 
     def switch_timers(self):

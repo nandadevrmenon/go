@@ -42,6 +42,7 @@ class SideBar(QWidget):
         statliches_heading1 = QFont(statliches, 35)  # minimalist display font
         statliches_heading2 = QFont(statliches, 25)
         statliches_heading3 = QFont(statliches, 20)
+        statliches_heading4 = QFont(statliches, 18)
         statliches_body = QFont(statliches, 16)
         font_color_white = f"color:{colors['white']}"
         align_left = Qt.AlignmentFlag.AlignLeft
@@ -76,14 +77,13 @@ class SideBar(QWidget):
 
         # indicates which player's turn it is to draw
         self.turn_label = QLabel("It's your turn!")
-        self.turn_label.setFont(statliches_heading1)
+        self.turn_label.setFont(statliches_heading2)
         self.turn_label.setAlignment(align_center)
         self.turn_label.setStyleSheet(
             f"color:{colors['grey']};"
             if not self.starts_first
             else f"color:{colors['orange']};"
         )
-        self.turn_label.setMinimumHeight(40)
         self.animate_text_timer = QTimer(
             self
         )  # connects a timer for the color change intevals
@@ -113,7 +113,7 @@ class SideBar(QWidget):
         player_box_grid.addWidget(self.player_label, 1, 0, 1, 1)
         player_box_grid.addWidget(color_label, 1, 1, 1, 1)
         player_box_grid.addWidget(self.timer_label, 2, 0, 1, 2)
-        player_box.setMinimumHeight(170)
+        player_box.setMinimumHeight(120)
 
         # the box with the scores
         score_box = QWidget()
