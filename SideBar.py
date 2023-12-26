@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (
     QGridLayout,
     QSpacerItem,
     QSizePolicy,
+    QApplication,
 )
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6 import QtCore
@@ -19,14 +20,11 @@ from styles import colors
 # from SkipTurnDialog import SkipTurnDialog
 # from CorrectGuessDialog import CorrectGuessDialog
 import random, csv
+import sys
 
 
 class SideBar(QWidget):
-    def __init__(
-        self,
-        player,
-        has_kumi,
-    ):
+    def __init__(self, player, has_kumi, starts_first=False):
         super().__init__()
 
         # main components settings
@@ -36,6 +34,7 @@ class SideBar(QWidget):
         self.setContentsMargins(0, 0, 0, 0)
         main_vbox.setContentsMargins(20, 30, 20, 0)
         main_vbox.setSpacing(20)
+        self.setMinimumWidth(260)
         self.setMaximumWidth(280)
 
         # initialise the fonts
@@ -47,11 +46,13 @@ class SideBar(QWidget):
         font_color_white = f"color:{colors['white']}"
         align_left = Qt.AlignmentFlag.AlignLeft
         align_right = Qt.AlignmentFlag.AlignRight
+        align_center = Qt.AlignmentFlag.AlignCenter
 
         # game variables
         self.player = player
         self.has_kumi = has_kumi
         self.kumi = 7.5 if self.has_kumi else 0
+        self.starts_first = starts_first
         self.player_name = str(player["name"]).upper()
         territory = player["score"][0]
         captured = player["score"][1]
@@ -75,19 +76,20 @@ class SideBar(QWidget):
 
         # indicates which player's turn it is to draw
         self.turn_label = QLabel("It's your turn!")
-        self.turn_label.setObjectName("turn_label")
         self.turn_label.setFont(statliches_heading1)
-        self.turn_label.setAlignment(align_left)
+        self.turn_label.setAlignment(align_center)
         self.turn_label.setStyleSheet(
-            f"color:{colors['orange']}; font-size:24px; padding-left: 8px;"
+            f"color:{colors['grey']};"
+            if not self.starts_first
+            else f"color:{colors['orange']};"
         )
-        self.turn_label.setHidden(True)
+        self.turn_label.setMinimumHeight(40)
         self.animate_text_timer = QTimer(
             self
         )  # connects a timer for the color change intevals
+        self.animate_text_timer.setInterval(600)
         self.animate_text_timer.timeout.connect(self.animate_turn_text)
-        self.animate_text_timer.start(1000)
-        self.colorFlag = False
+        self.colorFlag = not self.starts_first
 
         # label for player information
         self.player_label = QLabel(self.player_name)
@@ -111,6 +113,7 @@ class SideBar(QWidget):
         player_box_grid.addWidget(self.player_label, 1, 0, 1, 1)
         player_box_grid.addWidget(color_label, 1, 1, 1, 1)
         player_box_grid.addWidget(self.timer_label, 2, 0, 1, 2)
+        player_box.setMinimumHeight(170)
 
         # the box with the scores
         score_box = QWidget()
@@ -206,6 +209,11 @@ class SideBar(QWidget):
         # Update the countdown and display
         self.timer_counter -= 1
 
+        if self.timer_counter < 0:
+            # Stop the timer when the countdown reaches 0
+            self.timer.stop()
+            return
+
         # Convert remaining seconds to minutes and seconds
         minutes = self.timer_counter // 60
         seconds = self.timer_counter % 60
@@ -215,11 +223,11 @@ class SideBar(QWidget):
 
         if self.timer_counter <= 0:
             # Stop the timer when the countdown reaches 0
-            self.player_timer.stop()
+            self.timer.stop()
 
 
     def interrupt_timer(self):
-        self.player_timer.stop()
+        self.timer.stop()
 
     def reset_timer(self):
         self.player_timer.stop()
@@ -253,29 +261,22 @@ class SideBar(QWidget):
         else:
             return "Helvetica"  # fallback
 
-    def do_nothing(self):
-        pass
-
     def animate_turn_text(self):
         """
         sets the color to orange when color flag is true; white when false.
         connected to a timer interval, it will create a "flashing" effect
         """
         if self.colorFlag:
-            self.turn_label.setStyleSheet(
-                f"color:{colors['orange']}; font-size:24px; padding-left: 8px;"
-            )
+            self.turn_label.setStyleSheet(f"color:{colors['orange']};")
         else:
-            self.turn_label.setStyleSheet(
-                f"color:{colors['white']}; font-size:24px; padding-left: 8px;"
-            )
+            self.turn_label.setStyleSheet(f"color:{colors['grey']}; ")
         self.colorFlag = not self.colorFlag
 
-    def swap_player_turn(self):
-        """
-        swaps the current player
-        """
-        if self.current_player == self.player1:
-            self.current_player = self.player2
-        if self.current_player == self.player2:
-            self.current_player = self.player1
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = SideBar(
+        {"name": "asd", "score": [0, 0], "timer": QTimer()}, True
+    )  # open the start screen of the game
+    window.show()
+    app.exec()  # start the event loop running
