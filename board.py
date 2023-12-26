@@ -6,7 +6,6 @@ from PyQt6.QtCore import *
 from game_logic import GameLogic
 
 
-
 class Board(QFrame):  # base the board on a QFrame widget
     # signal sent when the timer is updated
 
@@ -56,13 +55,11 @@ class Board(QFrame):  # base the board on a QFrame widget
 
     def squareWidth(self):
         """returns the width of one square in the board"""
-        return self.boardWidth * 8
-        # return self.contentsRect().width() / self.boardWidth
+        return self.contentsRect().width() / self.boardWidth
 
     def squareHeight(self):
         """returns the height of one square of the board"""
-        return self.boardHeight * 8
-        # return self.contentsRect().height() / self.boardHeight
+        return self.contentsRect().height() / self.boardHeight
 
     def start(self):
         """starts game"""
@@ -81,21 +78,20 @@ class Board(QFrame):  # base the board on a QFrame widget
         """paints the board and the pieces of the game"""
         painter = QPainter(self)
         self.drawBoardSquares(painter)
-        stone = AnimatedPiece(painter, self.boardArray, self.squareWidth(), self.squareHeight())
-        stone.drawPieces()
+        self.drawPieces(painter)
 
     def mousePressEvent(self, event):
         """this event is automatically called when the mouse is pressed"""
         clickPos = event.pos()
 
         row = clickPos.x() // (self.height() // 7)
-        col = clickPos.y() // (self.width() // 8)
-        print("height = ", self.height(), self.width())
+        col = clickPos.y() // (self.width() // 7)
+        print("coord = ", clickPos.x(), clickPos.y())
         print(row, col)
 
         valid_move = self.try_move(col, row)
         if valid_move:
-            self.boardArray[5][5] = 2
+            self.boardArray[col + 1][row + 1] = 2
             self.update()
 
         # self.update()
@@ -210,50 +206,3 @@ class Board(QFrame):  # base the board on a QFrame widget
             return QFontDatabase.applicationFontFamilies(font_id)[0]
         else:
             return "Helvetica"  # fallback
-        
-
-class AnimatedPiece(QWidget):
-    def __init__(self,  painter, boardArray, squareWidth, squareHeight):
-        super().__init__()
-        self.painter = painter
-        self.boardArray = boardArray
-        self.squareWidth = squareWidth
-        self.squareHeight = squareHeight
-        self.setGeometry(100, 100, 400, 400)
-        self.animation = QPropertyAnimation(self, b"pos")
-        self.animation.setStartValue(QPoint(50, 50))
-        self.animation.setEndValue(QPoint(300, 300))
-        self.animation.setDuration(2000)  # Duration in milliseconds
-        self.animation.start()
-
-    def drawPieces(self):
-        self.painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        for row in range(0, len(self.boardArray)):
-            for col in range(0, len(self.boardArray[0])):
-                self.painter.save()
-                self.painter.translate(col * self.squareWidth, row * self.squareHeight)
-
-                # TODO - DONE draw some pieces as ellipses,  and set the painter brush to the correct color
-                # if self.boardArray[row][col] == 1:  # Black stone
-                #     pieceColor = QColor(0, 0, 0)  # Set brush color to black
-                #     # stone_image = black_stone
-                # elif self.boardArray[row][col] == 2:  # White stone
-                #     # Set brush color to white
-                #     pieceColor = QColor(255, 255, 255)
-                #     # stone_image = white_stone
-                # else:
-                #     self.painter.restore()
-                #     continue  # Empty intersection, move to the next
-
-                painter = QPainter(self)
-                painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-                painter.setBrush(QColor(0, 0, 0))
-
-                radius = int((self.squareWidth - 2) / 2.2)
-                center = QPoint(0, 0)
-
-                # Draw the piece
-                # self.painter.setBrush(pieceColor)
-                self.painter.drawEllipse(center, radius, radius)
-                
-                self.painter.restore()
