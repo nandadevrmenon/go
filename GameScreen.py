@@ -23,23 +23,11 @@ class GameScreen(QMainWindow):
         super().__init__()
         self.board = Board(self.try_move)
 
-        self.player1 = {"name": p1Name, "score": [12, 2], "timer": QTimer()}
-        self.player2 = {"name": p2Name, "score": [1, 78], "timer": QTimer()}
-        self.current_player = self.player1
         self.is_game_running = True
         self.is_game_started = False
-        self.game_logic = GameLogic(self.player1, self.player2)
+        self.game_logic = GameLogic(p1Name, p2Name)
 
         self.passed = False
-
-        game_state = [
-            self.player1,
-            self.player2,
-            self.current_player,
-            self.is_game_started,
-            self.is_game_running,
-            self.game_logic,
-        ]
 
         # set window appearance
         self.setWindowTitle("Go")
@@ -99,12 +87,12 @@ class GameScreen(QMainWindow):
 
         # create a Side bar into which the player info is passed (so it can create dialogs using that info which is readily available)
         self.p1_side = SideBar(
-            self.player1,
+            GameLogic.player1,
             False,
         )
 
         self.p2_side = SideBar(
-            self.player2,
+            GameLogic.player2,
             True,
         )
         indicate_player_turn(self)
@@ -131,8 +119,8 @@ class GameScreen(QMainWindow):
     def reset_game(self):
         print("baord being reset")
         self.game_logic.reset_board()
-        self.player1["score"] = [0, 0]
-        self.player2["score"] = [0, 0]
+        GameLogic.player1["score"] = [0, 0]
+        GameLogic.player2["score"] = [0, 0]
 
         self.p1_side.update_score()
         self.p2_side.update_score()
@@ -146,12 +134,12 @@ class GameScreen(QMainWindow):
 
     def undo_board(self):
         GameLogic.undo_board()
-        indicate_player_turn(self)
+        self.indicate_player_turn()
         # redraw board()
 
     def redo_board(self):
         GameLogic.redo_board()
-        indicate_player_turn(self)
+        self.indicate_player_turn()
 
     def try_move(self, y, x):
         try:
@@ -167,36 +155,34 @@ class GameScreen(QMainWindow):
     def end_game(self):
         pass
 
+    def indicate_player_turn(self):
+        if GameLogic.current_player == GameLogic.player1:
+            self.p1_side.turn_label.setHidden(
+                False
+            )  # show the "turn indicator" for player 1
+            self.p1_side.timer.timeout.connect(  # connects & activate timer for player 1
+                self.p1_side.update_timer
+            )
+            self.p2_side.interrupt_timer()  # stop the timer for player 1
+            self.p2_side.turn_label.setHidden(  # hides the "turn indicator" for player 2
+                True
+            )
+
+        if GameLogic.current_player == GameLogic.player2:
+            self.p2_side.turn_label.setHidden(  # show the "turn indicator" for player 2
+                False
+            )
+            self.p2_side.timer.timeout.connect(  # connects & activate timer for player 2
+                self.p2_side.update_timer
+            )
+            self.p1_side.interrupt_timer()  # stop the timer for player 1
+            self.p1_side.turn_label.setHidden(  # hides the "turn indicator" for player 1
+                True
+            )
+
 
 def do_nothing():
     pass
-
-
-def indicate_player_turn(self):
-    if self.current_player == self.player1:
-        self.p1_side.turn_label.setHidden(
-            False
-        )  # show the "turn indicator" for player 1
-        self.p1_side.timer.timeout.connect(  # connects & activate timer for player 1
-            self.p1_side.update_timer
-        )
-        self.p2_side.interrupt_timer()      # stop the timer for player 1
-        self.p2_side.turn_label.setHidden(  # hides the "turn indicator" for player 2
-            True
-        )  
-
-    if self.current_player == self.player2:
-        self.p2_side.turn_label.setHidden(  # show the "turn indicator" for player 2
-            False
-        )  
-        self.p2_side.timer.timeout.connect(  # connects & activate timer for player 2
-            self.p2_side.update_timer
-        )
-        self.p1_side.interrupt_timer()      # stop the timer for player 1
-        self.p1_side.turn_label.setHidden(  # hides the "turn indicator" for player 1
-            True
-        )  
-
 
 
 if __name__ == "__main__":
