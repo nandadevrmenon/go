@@ -26,6 +26,7 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.animation_radius = int((self.squareWidth() - 2) / 2.2) + 10
         self.animation_finished = False
         self.animation_timer.start(40)
+        self.opacity = 1
 
         self.x = None
         self.y = None
@@ -89,6 +90,7 @@ class Board(QFrame):  # base the board on a QFrame widget
         painter = QPainter(self)
         self.drawBoardSquares(painter)
         self.drawPieces(painter)
+        self.animatePieces(painter)
         # GameLogic
         # self.animatePieces(painter)
 
@@ -96,12 +98,25 @@ class Board(QFrame):  # base the board on a QFrame widget
         """this event is automatically called when the mouse is pressed"""
         clickPos = event.pos()
 
+        # convert the mouse click coordinate to row & col index on the board
         row = clickPos.x() // (self.height() // 7)
         col = clickPos.y() // (self.width() // 7)
-        # print("coord = ", clickPos.x(), clickPos.y())
-        # print(row, col)
+        pieceType = 1 if GameLogic.current_player == GameLogic.player1 else 2
+        # self.move_validity = GameLogic.try_move(pieceType, col, row) # how should this try move should be
+        self.move_validity = True
+        self.x = row
+        self.y = col
 
-        self.move_validity = self.try_move(col, row)
+        #timer for animation
+        self.animation_timer = QTimer(self)
+        self.animation_timer.timeout.connect(self.updateAnimation)
+        if self.move_validity:  # valid move animation
+            self.animation_radius = int((self.squareWidth() - 2) / 2.2) + 10
+        else:                   #invalid move animation
+            self.animation_radius = int((self.squareWidth() - 2) / 2.2)
+            self.opacity = 1
+        self.animation_finished = False
+        self.animation_timer.start(30)
         self.update()
 
     def drawBoardSquares(self, painter):
@@ -209,19 +224,20 @@ class Board(QFrame):  # base the board on a QFrame widget
                 painter.restore()
 
     def animatePieces(self, painter):
-        row = self.y
-        col = self.x
-        valid_move = self.move_validity
+        col = self.y
+        row = self.x
+        print(self.x, self.y)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         # print(self.x, self.y, self.move_validity)
-        if valid_move is None or (self.x is None and self.y is None):
+        if self.move_validity is None or (self.x is None and self.y is None):
             pass
-        elif valid_move:
-            painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-            # painter.translate(col * self.squareWidth(), row * self.squareHeight())
-            if GameLogic.board[row][col] == 1:  # Black stone
+        elif self.move_validity:
+            print(GameLogic.board[col][row].type)
+            painter.translate(col * self.squareWidth(), row * self.squareHeight())
+            if GameLogic.board[col][row].type == 1:  # Black stone
                 pieceColor = QColor(0, 0, 0)  # Set brush color to black
                 # stone_image = black_stone
-            elif GameLogic.board[row][col] == 2:  # White stone
+            elif GameLogic.board[col][row].type == 2:  # White stone
                 # Set brush color to white
                 pieceColor = QColor(255, 255, 255)
             else:
@@ -234,20 +250,25 @@ class Board(QFrame):  # base the board on a QFrame widget
                 self.animation_radius,
             )
             # print("Animate pieces ", row, col)
-        else:
-            # show red flash
-            pass
 
-        # else drawmakeEllipse Opacity
+        else:
+            # invalid move - red flash
+            color = QColor(255, 0, 0, int(self.opacity * 255))
+            painter.setBrush(color)
+            painter.drawEllipse(QPoint((col + 1) * int(self.squareWidth()), (row + 1) * int(self.squareHeight())), self.animation_radius, self.animation_radius)
 
     def updateAnimation(self):
-        # print("update Animation")
-        if not self.animation_finished:
-            self.animation_radius -= 1
-            if self.animation_radius == int((self.squareWidth() - 2) / 2.2):
+        if self.move_validity:
+            if not self.animation_finished:
+                self.animation_radius -= 1
+                if self.animation_radius == int((self.squareWidth() - 2) / 2.2):
+                    self.animation_finished = True
+                    self.animation_timer.stop()
+        else:
+            if not self.animation_finished:
+                self.opacity -= 0.05  # Decrease opacity (change this value as needed)
+            if self.opacity <= 0:
                 self.animation_finished = True
-                # self.animation_radius = int((self.squareWidth() - 2) / 2.2) + 10
-
                 self.animation_timer.stop()
 
             # Trigger widget repaint
