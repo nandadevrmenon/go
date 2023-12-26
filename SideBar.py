@@ -56,10 +56,10 @@ class SideBar(QWidget):
         territory = player["score"][0]
         captured = player["score"][1]
 
-        self.timer = player["timer"]  # to time the rounds
+        self.player_timer = player["timer"]  # to time the rounds
         self.timer_counter = 120
-        self.timer.setInterval(1000)
-        self.timer.timeout.connect(
+        self.player_timer.setInterval(1000)
+        self.player_timer.timeout.connect(
             self.update_timer
         )  # after every 1 second(which is the timeout for this one) we update the timer label
 
@@ -192,7 +192,7 @@ class SideBar(QWidget):
         main_vbox.addWidget(score_box)
         main_vbox.addItem(spacer)
 
-        self.timer.start()
+        self.player_timer.start()
 
     def update_score(self):
         territory = self.player["score"][0]
@@ -215,14 +215,14 @@ class SideBar(QWidget):
 
         if self.timer_counter <= 0:
             # Stop the timer when the countdown reaches 0
-            self.timer.stop()
+            self.player_timer.stop()
 
 
     def interrupt_timer(self):
-        self.timer.stop()
+        self.player_timer.stop()
 
     def reset_timer(self):
-        self.timer.stop()
+        self.player_timer.stop()
         self.timer_counter = 120
         self.timer_label.setText("02 : 00")
 
