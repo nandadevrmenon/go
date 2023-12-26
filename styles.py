@@ -6,4 +6,5 @@ colors = {
     "beaver": "#8A7968",
     "red": "#F95738",
     "orange": "#FF6636",
+    "grey": "#131313",
 }
