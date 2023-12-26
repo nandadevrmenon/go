@@ -21,6 +21,12 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.setFixedWidth(640)
         self.setFixedHeight(640)
 
+        self.animation_timer = QTimer(self)
+        self.animation_timer.timeout.connect(self.updateAnimation)
+        self.animation_radius = int((self.squareWidth() - 2) / 2.2) + 10
+        self.animation_finished = False
+        self.animation_timer.start(40)
+
     def initBoard(self):
         """initiates board"""
 
@@ -79,6 +85,7 @@ class Board(QFrame):  # base the board on a QFrame widget
         painter = QPainter(self)
         self.drawBoardSquares(painter)
         self.drawPieces(painter)
+        self.animatePieces(painter, 1,4,True)
 
     def mousePressEvent(self, event):
         """this event is automatically called when the mouse is pressed"""
@@ -96,7 +103,7 @@ class Board(QFrame):  # base the board on a QFrame widget
             else:
                 self.boardArray[col + 1][row + 1] = 2
 
-
+        self.animatePieces(row, col, valid_move)
         self.update()
 
     def drawBoardSquares(self, painter):
@@ -201,6 +208,38 @@ class Board(QFrame):  # base the board on a QFrame widget
                 painter.drawEllipse(center, radius, radius)
                 painter.restore()
 
+    def animatePieces(self,painter, row, col, valid_move):
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        # painter.translate(col * self.squareWidth(), row * self.squareHeight())
+        if self.boardArray[row][col] == 1:  # Black stone
+            pieceColor = QColor(0, 0, 0)  # Set brush color to black
+            # stone_image = black_stone
+        elif self.boardArray[row][col] == 2:  # White stone
+            # Set brush color to white
+            pieceColor = QColor(255, 255, 255)
+        else:
+            painter.restore()
+        # Draw the piece
+        painter.setBrush(QColor(255, 0, 255))
+        painter.drawEllipse(QPoint(col * int(self.squareWidth()), row * int(self.squareHeight())), self.animation_radius, self.animation_radius)
+        print("Animate pieces ", row, col)
+        
+        # else drawmakeEllipse Opacity
+
+    def updateAnimation(self):
+        print("update Animation")
+        if not self.animation_finished:
+            self.animation_radius -= 1
+            if self.animation_radius == int((self.squareWidth() - 2) / 2.2):
+                self.animation_finished = True
+                # self.animation_radius = int((self.squareWidth() - 2) / 2.2) + 10
+
+                self.animation_timer.stop()
+
+
+            # Trigger widget repaint
+        self.update()
+    
     def get_statliches_font(self):
         font_path = QtCore.QDir.currentPath() + "/fonts/statliches.ttf"
         font_id = QFontDatabase.addApplicationFont(font_path)  # load font
