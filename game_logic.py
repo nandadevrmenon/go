@@ -15,8 +15,8 @@ class GameLogic:
 
     def __init__(self, p1Name=None, p2Name=None):
         if p1Name is not None and p2Name is not None:
-            GameLogic.player1 = {"name": p1Name, "score": [12, 2], "timer": QTimer()}
-            GameLogic.player2 = {"name": p2Name, "score": [1, 78], "timer": QTimer()}
+            GameLogic.player1 = {"name": p1Name, "score": [0, 0], "timer": QTimer()}
+            GameLogic.player2 = {"name": p2Name, "score": [0, 0], "timer": QTimer()}
             GameLogic.current_player = GameLogic.player1
             GameLogic.temp_captured = 0
 
@@ -35,7 +35,6 @@ class GameLogic:
                     )
             GameLogic.board_states.append(GameLogic.get_board_state(GameLogic.board))
             GameLogic.turn = len(GameLogic.board_states)
-
 
     @staticmethod
     def try_move(type, y, x):
@@ -205,21 +204,6 @@ class GameLogic:
             GameLogic.turn += 1
 
     @staticmethod
-    def reset_board():
-        GameLogic.board_states = [None]
-        GameLogic.board = []
-        GameLogic.all_groups = []
-        GameLogic.current_player = GameLogic.player1
-        for i in range(7):
-            GameLogic.board.append([])
-            for j in range(7):
-                GameLogic.board[i].append(
-                    Piece(i, j, GameLogic.board_states, GameLogic.all_groups)
-                )
-
-        GameLogic.board_states.append(GameLogic.get_board_state(GameLogic.board))
-
-    @staticmethod
     def undo_board():
         if GameLogic.turn > 2:
             GameLogic.turn -= 1
@@ -231,6 +215,8 @@ class GameLogic:
             GameLogic.board = prev_board
             GameLogic.all_groups = prev_groups
             GameLogic.flip_turn()
+            return True
+        return False
 
     def redo_board():
         if GameLogic.turn < len(GameLogic.board_states):
@@ -243,6 +229,29 @@ class GameLogic:
             GameLogic.all_groups = next_groups
             GameLogic.flip_turn()
             GameLogic.turn += 1
+            return True
+        return False
+
+    @staticmethod
+    def reset_board():
+        GameLogic.current_player = GameLogic.player1
+        GameLogic.temp_captured = 0
+
+        GameLogic.board_states = [
+            None,
+        ]
+        GameLogic.board = []
+        GameLogic.all_groups = []
+        GameLogic.score_states = [None, {"p1": [0, 0], "p2": [0, 0]}]
+
+        for i in range(7):
+            GameLogic.board.append([])
+            for j in range(7):
+                GameLogic.board[i].append(
+                    Piece(i, j, GameLogic.board, GameLogic.all_groups)
+                )
+        GameLogic.board_states.append(GameLogic.get_board_state(GameLogic.board))
+        GameLogic.turn = len(GameLogic.board_states)
 
     @staticmethod
     def print_board(board):

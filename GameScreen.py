@@ -96,6 +96,7 @@ class GameScreen(QMainWindow):
             True,
         )
         self.indicate_player_turn()
+        self.switch_timers()
 
         # define and adjust main layout
         central_widget = QWidget()
@@ -124,22 +125,23 @@ class GameScreen(QMainWindow):
 
         self.p1_side.update_score()
         self.p2_side.update_score()
+        self.p1_side.reset_timer()
+        self.p2_side.reset_timer()
 
         # show indication for the player of the round
         self.indicate_player_turn()
-
+        self.switch_timers()
         self.redraw_board()
 
-        # then redraw an empty board ( or basically call theupdate board method. that basically redarws theboard according to the static vairblae board in the GameLogic class)
-
     def undo_board(self):
-        GameLogic.undo_board()
-        self.indicate_player_turn()
-        # redraw board()
+        if GameLogic.undo_board():
+            self.indicate_player_turn()
+            self.switch_timers()
 
     def redo_board(self):
-        GameLogic.redo_board()
-        self.indicate_player_turn()
+        if GameLogic.redo_board():
+            self.indicate_player_turn()
+            self.switch_timers()
 
     def try_move(self, y, x):
         try:
@@ -150,7 +152,7 @@ class GameScreen(QMainWindow):
             # update side bars and anything else
 
     def redraw_board(self):
-        pass
+        self.board.update()
 
     def end_game(self):
         pass
@@ -160,25 +162,26 @@ class GameScreen(QMainWindow):
             self.p1_side.turn_label.setHidden(
                 False
             )  # show the "turn indicator" for player 1
-            self.p1_side.timer.timeout.connect(  # connects & activate timer for player 1
-                self.p1_side.update_timer
-            )
-            self.p2_side.interrupt_timer()  # stop the timer for player 1
             self.p2_side.turn_label.setHidden(  # hides the "turn indicator" for player 2
                 True
             )
 
-        if GameLogic.current_player == GameLogic.player2:
-            self.p2_side.turn_label.setHidden(  # show the "turn indicator" for player 2
+        else:
+            self.p2_side.turn_label.setHidden(
                 False
-            )
-            self.p2_side.timer.timeout.connect(  # connects & activate timer for player 2
-                self.p2_side.update_timer
-            )
-            self.p1_side.interrupt_timer()  # stop the timer for player 1
-            self.p1_side.turn_label.setHidden(  # hides the "turn indicator" for player 1
+            )  # show the "turn indicator" for player 1
+            self.p1_side.turn_label.setHidden(  # hides the "turn indicator" for player 2
                 True
             )
+
+    def switch_timers(self):
+        if GameLogic.current_player == GameLogic.player1:
+            self.p1_side.timer.start()  # stop the timer for player 1
+            self.p2_side.timer.stop()
+
+        else:
+            self.p2_side.timer.start()  # stop the timer for player 1
+            self.p1_side.timer.stop()
 
 
 def do_nothing():
