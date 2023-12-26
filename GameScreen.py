@@ -21,18 +21,21 @@ class GameScreen(QMainWindow):
 
     def __init__(self, p1Name, p2Name):
         super().__init__()
+        self.board = Board(self.try_move)
 
         self.player1 = {"name": p1Name, "score": [12, 2], "timer": QTimer()}
         self.player2 = {"name": p2Name, "score": [1, 78], "timer": QTimer()}
-        self.currentPlayer = self.player1
+        self.current_player = self.player1
         self.is_game_running = True
         self.is_game_started = False
-        self.game_logic = GameLogic()
+        self.game_logic = GameLogic(self.player1, self.player2)
+
+        self.passed = False
 
         game_state = [
             self.player1,
             self.player2,
-            self.currentPlayer,
+            self.current_player,
             self.is_game_started,
             self.is_game_running,
             self.game_logic,
@@ -71,9 +74,9 @@ class GameScreen(QMainWindow):
         button_dock.setLayout(button_dock_layout)
         button_dock.setFixedHeight(100)
 
-        undo_button = PrimaryButton("Undo", do_nothing)
-        redo_button = PrimaryButton("Redo", do_nothing)
-        pass_button = PrimaryButton("Pass", do_nothing)
+        undo_button = PrimaryButton("Undo", self.undo_board)
+        redo_button = PrimaryButton("Redo", self.redo_board)
+        pass_button = PrimaryButton("Pass", self.check_passes)
         resign_button = PrimaryButton("Resign", do_nothing)
         pause_button = PrimaryButton("Pause", do_nothing)
         reset_button = PrimaryButton("Reset", self.reset_game)
@@ -86,7 +89,6 @@ class GameScreen(QMainWindow):
         button_dock_layout.addWidget(reset_button)
 
         center_board = QHBoxLayout()
-        self.board = Board(game_state)
 
         center_board.addStretch()
         center_board.addWidget(self.board)
@@ -105,6 +107,7 @@ class GameScreen(QMainWindow):
             self.player2,
             True,
         )
+        indicate_player_turn(self)
 
         # define and adjust main layout
         central_widget = QWidget()
@@ -118,6 +121,13 @@ class GameScreen(QMainWindow):
         self.setCentralWidget(central_widget)
         central_widget.setLayout(main_layout)
 
+    def check_passes(self):
+        if self.passed:
+            self.reset_game()
+            self.end_game()
+        else:
+            self.passed = True
+
     def reset_game(self):
         print("baord being reset")
         self.game_logic.reset_board()
@@ -125,18 +135,69 @@ class GameScreen(QMainWindow):
         self.player2["score"] = [0, 0]
 
         self.p1_side.update_score()
-        self.p1_side.reset_timer()
         self.p2_side.update_score()
-        self.p2_side.reset_timer()
+
+        # show indication for the player of the round
+        self.indicate_player_turn()
+
+        self.redraw_board()
+
         # then redraw an empty board ( or basically call theupdate board method. that basically redarws theboard according to the static vairblae board in the GameLogic class)
+
+    def undo_board(self):
+        GameLogic.undo_board()
+        indicate_player_turn(self)
+        # redraw board()
+
+    def redo_board(self):
+        GameLogic.redo_board()
+        indicate_player_turn(self)
+
+    def try_move(self, y, x):
+        try:
+            type = 1 if GameLogic.current_player is GameLogic.player1 else 2
+            return GameLogic.try_move(type, y, x)
+        finally:
+            pass
+            # update side bars and anything else
+
+    def redraw_board(self):
+        pass
+
+    def end_game(self):
+        pass
 
 
 def do_nothing():
     pass
 
 
-def redraw_board():
-    pass
+def indicate_player_turn(self):
+    if self.current_player == self.player1:
+        self.p1_side.turn_label.setHidden(
+            False
+        )  # show the "turn indicator" for player 1
+        self.p1_side.timer.timeout.connect(  # connects & activate timer for player 1
+            self.p1_side.update_timer
+        )
+        self.p2_side.turn_label.setHidden(
+            True
+        )  # hides the "turn indicator" for player 2
+        self.p2_side.reset_timer()  # resets timer & counter for player 2
+        self.p2_side.timer_counter = 120
+
+    if self.current_player == self.player2:
+        self.p2_side.turn_label.setHidden(
+            False
+        )  # show the "turn indicator" for player 2
+        self.p2_side.timer.timeout.connect(  # connects & activate timer for player 2
+            self.p2_side.update_timer
+        )
+        self.p1_side.turn_label.setHidden(
+            True
+        )  # hides the "turn indicator" for player 1
+        self.p1_side.reset_timer()  # resets timer & counter for player 1
+        self.p1_side.timer_counter = 120
 
 
 if __name__ == "__main__":

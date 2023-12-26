@@ -129,11 +129,16 @@ class Group(object):
 
     def remove(self):
         """Remove the entire group."""
-        while self.stones:
-            self.stones[0].remove()
-            del self.stones[0]
-        self.all_groups.remove(self)
-        del self
+        try:
+            counter = 0
+            while self.stones:
+                self.stones[0].remove()
+                counter += 1
+                del self.stones[0]
+            self.all_groups.remove(self)
+            return counter
+        finally:
+            del self
 
     def check_for_life(self):
         for stone in self.stones:

@@ -74,11 +74,22 @@ class SideBar(QWidget):
         )
 
         # indicates which player's turn it is to draw
+        self.turn_label = QLabel("It's your turn!")
+        self.turn_label.setObjectName("turn_label")
+        self.turn_label.setFont(statliches_heading1)
+        self.turn_label.setAlignment(align_left)
+        self.turn_label.setStyleSheet(f"color:{colors['orange']}; font-size:24px; padding-left: 8px;")
+        self.turn_label.setHidden(True)
+        self.animate_text_timer = QTimer(self)      # connects a timer for the color change intevals
+        self.animate_text_timer.timeout.connect(self.animate_turn_text)
+        self.animate_text_timer.start(1000)
+        self.colorFlag = False
+        
+        # label for player information
         self.player_label = QLabel(self.player_name)
         self.player_label.setFont(statliches_heading1)
         self.player_label.setAlignment(align_left)
         self.player_label.setStyleSheet(f"color:{colors['yellow']}")
-
         color_label = QLabel("White" if self.has_kumi else "Black")
         color_label.setFont(statliches_heading2)
         color_label.setStyleSheet(font_color_white)
@@ -92,9 +103,10 @@ class SideBar(QWidget):
         self.timer_label.setAlignment(align_right if self.has_kumi else align_left)
 
         # add everything to the turnbox vertical layout
-        player_box_grid.addWidget(self.player_label, 0, 0, 1, 1)
-        player_box_grid.addWidget(color_label, 0, 1, 1, 1)
-        player_box_grid.addWidget(self.timer_label, 1, 0, 1, 2)
+        player_box_grid.addWidget(self.turn_label, 0, 0, 1, 2)
+        player_box_grid.addWidget(self.player_label, 1, 0, 1, 1)
+        player_box_grid.addWidget(color_label, 1, 1, 1, 1)
+        player_box_grid.addWidget(self.timer_label, 2, 0, 1, 2)
 
         # the box with the scores
         score_box = QWidget()
@@ -128,6 +140,7 @@ class SideBar(QWidget):
         captured_label.setFont(statliches_heading3)
         captured_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         captured_label.setStyleSheet(font_color_white)
+
         # player 2's score
         self.captured_value = QLabel(str(captured))
         self.captured_value.setFont(statliches_heading3)
@@ -199,6 +212,8 @@ class SideBar(QWidget):
         if self.timer_counter <= 0:
             # Stop the timer when the countdown reaches 0
             self.timer.stop()
+            self.swap_player_turn()
+
 
     def reset_timer(self):
         self.timer.stop()
@@ -234,3 +249,24 @@ class SideBar(QWidget):
 
     def do_nothing(self):
         pass
+
+    def animate_turn_text(self):
+        """
+            sets the color to orange when color flag is true; white when false. 
+            connected to a timer interval, it will create a "flashing" effect
+        """
+        if self.colorFlag:
+            self.turn_label.setStyleSheet(f"color:{colors['orange']}; font-size:24px; padding-left: 8px;")
+        else:
+            self.turn_label.setStyleSheet(f"color:{colors['white']}; font-size:24px; padding-left: 8px;")
+        self.colorFlag = not self.colorFlag
+
+    def swap_player_turn(self):
+        """
+            swaps the current player
+        """
+        if self.current_player == self.player1:
+            self.current_player = self.player2
+        if self.current_player == self.player2:
+            self.current_player = self.player1
+
