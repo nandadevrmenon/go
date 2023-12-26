@@ -89,7 +89,7 @@ class Board(QFrame):  # base the board on a QFrame widget
         painter = QPainter(self)
         self.drawBoardSquares(painter)
         self.drawPieces(painter)
-        GameLogic
+        # GameLogic
         # self.animatePieces(painter)
 
     def mousePressEvent(self, event):
@@ -184,7 +184,9 @@ class Board(QFrame):  # base the board on a QFrame widget
         for row in range(0, len(GameLogic.board)):
             for col in range(0, len(GameLogic.board[0])):
                 painter.save()
-                painter.translate(col * self.squareWidth(), row * self.squareHeight())
+                painter.translate(
+                    (col + 1) * self.squareWidth(), (row + 1) * self.squareHeight()
+                )
 
                 # TODO - DONE draw some pieces as ellipses,  and set the painter brush to the correct color
                 if GameLogic.board[row][col].type == 1:  # Black stone
