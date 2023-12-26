@@ -95,7 +95,7 @@ class GameScreen(QMainWindow):
             GameLogic.player2,
             True,
         )
-        indicate_player_turn(self)
+        self.indicate_player_turn()
 
         # define and adjust main layout
         central_widget = QWidget()
