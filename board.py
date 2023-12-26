@@ -91,10 +91,13 @@ class Board(QFrame):  # base the board on a QFrame widget
 
         valid_move = self.try_move(col, row)
         if valid_move:
-            self.boardArray[col + 1][row + 1] = 2
-            self.update()
+            if GameLogic.current_player == GameLogic.player1:
+                self.boardArray[col + 1][row + 1] = 1
+            else:
+                self.boardArray[col + 1][row + 1] = 2
 
-        # self.update()
+
+        self.update()
 
     def drawBoardSquares(self, painter):
         """draw all the square on the board"""
