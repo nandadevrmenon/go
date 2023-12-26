@@ -212,8 +212,9 @@ class SideBar(QWidget):
         if self.timer_counter <= 0:
             # Stop the timer when the countdown reaches 0
             self.timer.stop()
-            self.swap_player_turn()
 
+    def interrupt_timer(self):
+        self.timer.stop()
 
     def reset_timer(self):
         self.timer.stop()
