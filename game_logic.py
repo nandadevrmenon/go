@@ -33,9 +33,9 @@ class GameLogic:
                     GameLogic.board[i].append(
                         Piece(i, j, GameLogic.board, GameLogic.all_groups)
                     )
-
             GameLogic.board_states.append(GameLogic.get_board_state(GameLogic.board))
             GameLogic.turn = len(GameLogic.board_states)
+
 
     @staticmethod
     def try_move(type, y, x):
