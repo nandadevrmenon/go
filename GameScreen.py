@@ -180,24 +180,23 @@ def indicate_player_turn(self):
         self.p1_side.timer.timeout.connect(  # connects & activate timer for player 1
             self.p1_side.update_timer
         )
-        self.p2_side.turn_label.setHidden(
+        self.p2_side.interrupt_timer()      # stop the timer for player 1
+        self.p2_side.turn_label.setHidden(  # hides the "turn indicator" for player 2
             True
-        )  # hides the "turn indicator" for player 2
-        self.p2_side.reset_timer()  # resets timer & counter for player 2
-        self.p2_side.timer_counter = 120
+        )  
 
     if self.current_player == self.player2:
-        self.p2_side.turn_label.setHidden(
+        self.p2_side.turn_label.setHidden(  # show the "turn indicator" for player 2
             False
-        )  # show the "turn indicator" for player 2
+        )  
         self.p2_side.timer.timeout.connect(  # connects & activate timer for player 2
             self.p2_side.update_timer
         )
-        self.p1_side.turn_label.setHidden(
+        self.p1_side.interrupt_timer()      # stop the timer for player 1
+        self.p1_side.turn_label.setHidden(  # hides the "turn indicator" for player 1
             True
-        )  # hides the "turn indicator" for player 1
-        self.p1_side.reset_timer()  # resets timer & counter for player 1
-        self.p1_side.timer_counter = 120
+        )  
+
 
 
 if __name__ == "__main__":
