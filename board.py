@@ -240,11 +240,10 @@ class Board(QFrame):  # base the board on a QFrame widget
         col = self.x
         print(self.x, self.y)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        # print(self.x, self.y, self.move_validity)
+        pieceColor = QColor(0,0,0,0)
         if self.move_validity is None or (self.x is None and self.y is None):
             pass
         elif self.move_validity:
-            print(GameLogic.board[row][col].type)
             # painter.translate(col * self.squareWidth(), row * self.squareHeight())
             if GameLogic.board[row][col].type == 1:  # Black stone
                 pieceColor = QColor(0, 0, 0)  # Set brush color to black
@@ -261,7 +260,6 @@ class Board(QFrame):  # base the board on a QFrame widget
                 self.animation_radius,
                 self.animation_radius,
             )
-            # print("Animate pieces ", row, col)
 
         else:
             # invalid move - red flash
@@ -277,16 +275,16 @@ class Board(QFrame):  # base the board on a QFrame widget
             )
 
     def updateAnimation(self):
-        if self.move_validity:
-            if not self.animation_finished:
-                self.animation_radius -= 1
-                if self.animation_radius == int((self.squareWidth() - 2) / 2.2):
+        if self.move_validity: # valid move - shrink effect
+            if not self.animation_finished: 
+                self.animation_radius -= 1 # decrease the radius 
+                if self.animation_radius == int((self.squareWidth() - 2) / 2.2): # stop animated when reach the radius of the pieces
                     self.animation_finished = True
                     self.animation_timer.stop()
         else:
-            if not self.animation_finished:
-                self.opacity -= 0.05  # Decrease opacity (change this value as needed)
-            if self.opacity <= 0:
+            if not self.animation_finished: #invalid move - red pieces
+                self.opacity -= 0.05  # Decrease opacity 
+            if self.opacity <= 0:   # stop animated when reach the opacity is 0
                 self.animation_finished = True
                 self.animation_timer.stop()
 
@@ -295,8 +293,7 @@ class Board(QFrame):  # base the board on a QFrame widget
 
     def capturedAnimation(self, painter, captured_group):
         for i in captured_group:
-            print(i)
-            if i[2] == 1:
+            if i[2] == 1: # check the type of peices and set the brushColor
                 color = QColor(0, 0, 0, int(self.group_opacity * 255))
             else: 
                 color = QColor(255, 255, 255, int(self.group_opacity * 255))
@@ -312,9 +309,8 @@ class Board(QFrame):  # base the board on a QFrame widget
                 )
         
     def update_captured_animation(self):
-        print("update")
         if not self.group_animation_finished:
-            self.group_opacity -= 0.05  # Decrease opacity (change this value as needed)
+            self.group_opacity -= 0.05  # Decrease opacity 
             if self.group_opacity <= 0:
                 self.group_animation_finished = True
                 self.group_animation_timer.stop()
