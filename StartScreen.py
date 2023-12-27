@@ -68,7 +68,7 @@ class StartScreen(QMainWindow):
         logo_font = QFont(get_tan_nimbus(), 70)
         main_logo_label.setFont(logo_font)
         main_logo_label.setStyleSheet(f"color:{colors['yellow']}")
-        main_logo_label.setFixedHeight(70)
+        # main_logo_label.setFixedHeight(70)
 
         main_logo_subtext = QLabel("The 2 player strategy game")
         main_logo_subtext.setAlignment(Qt.AlignmentFlag.AlignCenter)
