@@ -25,8 +25,16 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.animation_timer.timeout.connect(self.updateAnimation)
         self.animation_radius = int((self.squareWidth() - 2) / 2.2) + 10
         self.animation_finished = False
-        self.animation_timer.start(40)
+        self.animation_timer.start(30)
         self.opacity = 1
+        self.animation_radius = int((self.squareWidth() - 2) / 2.2)
+
+        self.group_animation_timer = QTimer(self)
+        self.group_animation_timer.timeout.connect(self.update_captured_animation)
+        self.group_opacity = 1
+        self.group_animation_finished = False
+        self.group_animation_timer.start(30)
+
 
         self.x = None
         self.y = None
@@ -88,9 +96,11 @@ class Board(QFrame):  # base the board on a QFrame widget
     def paintEvent(self, event):
         """paints the board and the pieces of the game"""
         painter = QPainter(self)
+        painter.setPen(QPen(QColor(0,0,0,0)))
         self.drawBoardSquares(painter)
         self.drawPieces(painter)
         self.animatePieces(painter)
+        self.capturedAnimation(painter, [[2,2,2], [2,3,2], [3,2,2],[3,3,2]])
         # GameLogic
         # self.animatePieces(painter)
 
@@ -235,7 +245,7 @@ class Board(QFrame):  # base the board on a QFrame widget
             pass
         elif self.move_validity:
             print(GameLogic.board[row][col].type)
-            painter.translate(col * self.squareWidth(), row * self.squareHeight())
+            # painter.translate(col * self.squareWidth(), row * self.squareHeight())
             if GameLogic.board[row][col].type == 1:  # Black stone
                 pieceColor = QColor(0, 0, 0)  # Set brush color to black
                 # stone_image = black_stone
@@ -247,7 +257,7 @@ class Board(QFrame):  # base the board on a QFrame widget
             # Draw the piece
             painter.setBrush(pieceColor)
             painter.drawEllipse(
-                QPoint(col * int(self.squareWidth()), row * int(self.squareHeight())),
+                QPoint((col + 1) * int(self.squareWidth()), (row + 1) * int(self.squareHeight())),
                 self.animation_radius,
                 self.animation_radius,
             )
@@ -283,6 +293,33 @@ class Board(QFrame):  # base the board on a QFrame widget
             # Trigger widget repaint
         self.update()
 
+    def capturedAnimation(self, painter, captured_group):
+        for i in captured_group:
+            print(i)
+            if i[2] == 1:
+                color = QColor(0, 0, 0, int(self.group_opacity * 255))
+            else: 
+                color = QColor(255, 255, 255, int(self.group_opacity * 255))
+ 
+            painter.setBrush(color)
+            painter.drawEllipse(
+                    QPoint(
+                        (i[0] + 1) * int(self.squareWidth()),
+                        (i[1] + 1) * int(self.squareHeight()),
+                    ),
+                    self.animation_radius,
+                    self.animation_radius
+                )
+        
+    def update_captured_animation(self):
+        print("update")
+        if not self.group_animation_finished:
+            self.group_opacity -= 0.05  # Decrease opacity (change this value as needed)
+            if self.group_opacity <= 0:
+                self.group_animation_finished = True
+                self.group_animation_timer.stop()
+
+    
     def get_statliches_font(self):
         font_path = QtCore.QDir.currentPath() + "/fonts/statliches.ttf"
         font_id = QFontDatabase.addApplicationFont(font_path)  # load font
