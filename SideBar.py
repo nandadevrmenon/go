@@ -70,7 +70,7 @@ class SideBar(QWidget):
         if self.is_speed_go:
             self.timer = player["timer"]  # to time the rounds
             self.timer_counter = 120
-            self.timer.setInterval(10)
+            self.timer.setInterval(1)
             self.timer.timeout.connect(
                 self.update_timer
             )  # after every 1 second(which is the timeout for this one) we update the timer label
@@ -114,7 +114,7 @@ class SideBar(QWidget):
         )
 
         # shows the time remaining and is being updated by the QTimer
-        self.timer_label = QLabel("20 : 00")
+        self.timer_label = QLabel("02 : 00")
         self.timer_label.setFont(statliches_heading2)
         self.timer_label.setAlignment(align_right if self.has_kumi else align_left)
 
@@ -216,7 +216,7 @@ class SideBar(QWidget):
 
     def update_timer(self):
         # Update the countdown and display
-        self.timer_counter -= 0.01
+        self.timer_counter -= 0.001
 
         if self.timer_counter < 0:
             # Stop the timer when the countdown reaches 0
