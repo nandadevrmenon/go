@@ -101,9 +101,8 @@ class Board(QFrame):  # base the board on a QFrame widget
         # convert the mouse click coordinate to row & col index on the board
         row = clickPos.x() // (self.height() // 7)
         col = clickPos.y() // (self.width() // 7)
-        pieceType = 1 if GameLogic.current_player == GameLogic.player1 else 2
-        self.move_validity = GameLogic.try_move(
-            pieceType, col, row
+        self.move_validity = self.try_move(
+            col, row
         )  # how should this try move should be
 
         self.x = row

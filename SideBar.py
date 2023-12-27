@@ -24,7 +24,14 @@ import sys
 
 
 class SideBar(QWidget):
-    def __init__(self, player, has_kumi, starts_first=False, is_speed_go=False):
+    def __init__(
+        self,
+        player,
+        has_kumi,
+        starts_first=False,
+        is_speed_go=False,
+        resign_callback=None,
+    ):
         super().__init__()
 
         # main components settings
@@ -50,6 +57,7 @@ class SideBar(QWidget):
         align_center = Qt.AlignmentFlag.AlignCenter
 
         # game variables
+        self.resign_callback = resign_callback
         self.player = player
         self.has_kumi = has_kumi
         self.kumi = 7.5 if self.has_kumi else 0
@@ -213,7 +221,7 @@ class SideBar(QWidget):
         if self.timer_counter < 0:
             # Stop the timer when the countdown reaches 0
             self.timer.stop()
-            self.parentWidget().resign_from_game()
+            self.resign_callback()
             return
 
         # Convert remaining seconds to minutes and seconds

@@ -19,6 +19,7 @@ import math
 
 from game_logic import GameLogic
 from GameEndDialogue import GameEndDialog
+from IconButton import IconButton
 
 # from DrawingArea import DrawingArea
 # from HelpDialog import HelpDialog
@@ -37,6 +38,7 @@ class GameScreen(QMainWindow):
         self.game_logic = GameLogic(p1Name, p2Name)
         self.is_speed_go = is_speed_go
         self.is_handicap = is_handicap
+        self.handicap_count = 2 if is_handicap else 0
 
         self.passed = False
 
@@ -73,8 +75,13 @@ class GameScreen(QMainWindow):
         button_dock.setLayout(button_dock_layout)
         button_dock.setFixedHeight(100)
 
-        undo_button = PrimaryButton("Undo", self.undo_board)
-        redo_button = PrimaryButton("Redo", self.redo_board)
+        undo_icon = QIcon("images/undo.png")
+        redo_icon = QIcon("images/redo.png")
+
+        self.undo_button = IconButton(undo_icon, self.undo_board, "Undo Move")
+        self.redo_button = IconButton(redo_icon, self.redo_board, "Redo Move")
+        self.undo_button.setDisabled(True)
+        self.redo_button.setDisabled(True)
         pass_button = PrimaryButton("Pass", self.check_passes)
         resign_button = PrimaryButton("Resign", self.resign_from_game)
         pause_button = PrimaryButton("Pause", do_nothing)
@@ -85,8 +92,8 @@ class GameScreen(QMainWindow):
         )
 
         button_dock_layout.addStretch()
-        button_dock_layout.addWidget(undo_button)
-        button_dock_layout.addWidget(redo_button)
+        button_dock_layout.addWidget(self.undo_button)
+        button_dock_layout.addWidget(self.redo_button)
         button_dock_layout.addSpacerItem(spacer)
         button_dock_layout.addWidget(pass_button)
         button_dock_layout.addWidget(resign_button)
@@ -113,6 +120,7 @@ class GameScreen(QMainWindow):
             has_kumi=False,
             starts_first=not is_handicap,
             is_speed_go=self.is_speed_go,
+            resign_callback=self.resign_from_game,
         )
 
         self.p2_side = SideBar(
@@ -120,6 +128,7 @@ class GameScreen(QMainWindow):
             has_kumi=True,
             starts_first=is_handicap,
             is_speed_go=self.is_speed_go,
+            resign_callback=self.resign_from_game,
         )
 
         # define and adjust main layout
@@ -136,6 +145,18 @@ class GameScreen(QMainWindow):
 
     def start_game(self):
         self.switch_timers()
+
+    def try_move(self, y, x):
+        try:
+            type = 1 if GameLogic.current_player is GameLogic.player1 else 2
+            return GameLogic.try_move(type, y, x)
+        finally:
+            self.p1_side.update_score()
+            self.p2_side.update_score()
+            self.switch_timers()
+            self.passed = False
+            self.undo_button.setDisabled(not GameLogic.undo_is_possible())
+            self.redo_button.setDisabled(not GameLogic.redo_is_possible())
 
     def check_passes(self):
         print(self.passed)
@@ -159,6 +180,7 @@ class GameScreen(QMainWindow):
             self.p2_side.reset_timer()
         self.p1_side.default_turn_animation()
         self.p2_side.default_turn_animation()
+
         self.board.move_validity = None
         self.redraw_board()
 
@@ -166,28 +188,20 @@ class GameScreen(QMainWindow):
         if GameLogic.undo_board():
             self.switch_timers()
             self.redraw_board()
+            self.redo_button.setDisabled(False)
+            self.undo_button.setDisabled(not GameLogic.undo_is_possible())
 
     def redo_board(self):
         if GameLogic.redo_board():
             self.switch_timers()
             self.redraw_board()
+            self.undo_button.setDisabled(False)
+            self.redo_button.setDisabled(not GameLogic.redo_is_possible())
 
     def resign_from_game(self):
         # show which plyer lost in the Reisgn dialog and thats the end of it .
         print(GameLogic.current_player["name"], "has resigned")
         pass
-
-    def try_move(self, y, x):
-        try:
-            type = 1 if GameLogic.current_player is GameLogic.player1 else 2
-            return GameLogic.try_move(type, y, x)
-        finally:
-            self.redraw_board()
-            self.p1_side.update_score()
-            self.p2_side.update_score()
-            self.switch_timers()
-            self.passed = False
-            print(self.passed)
 
     def redraw_board(self):
         self.board.update()
@@ -228,7 +242,7 @@ def do_nothing():
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = GameScreen(
-        "bruh", "hello", False, False
+        "bruh", "hello", True, False
     )  # open the start screen of the game
     window.show()
     app.exec()  # start the event loop running
