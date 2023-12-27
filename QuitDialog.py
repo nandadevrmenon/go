@@ -25,12 +25,6 @@ class QuitDialog(QDialog):
         label.setFont(QFont("Helvetica", 18))
         label.setStyleSheet("color: white;")
 
-        icon_label = QLabel()
-        icon_label.setPixmap(
-            QIcon("icons/sad.png").pixmap(100, 100)
-        )  # shows a sad panda
-        icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
         yes_button = SecondaryButton(
             "Yes", self.quit_application
         )  # secondary button that quit application
@@ -41,9 +35,8 @@ class QuitDialog(QDialog):
 
         # add all the widgets
         layout.addWidget(label, 0, 0, 1, 2)
-        layout.addWidget(icon_label, 1, 0, 1, 2)
-        layout.addWidget(yes_button, 2, 0, 1, 1)
-        layout.addWidget(no_button, 2, 1, 1, 1)
+        layout.addWidget(yes_button, 1, 0, 1, 1)
+        layout.addWidget(no_button, 1, 1, 1, 1)
 
     def quit_application(self):
         QApplication.quit()
