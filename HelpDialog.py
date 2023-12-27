@@ -115,13 +115,7 @@ class HelpDialog(QDialog):
                     "and then subtracts the number of stones that were captured by the opponent."
                 ),
             },
-            {
-                "title": "Empty",
-                "image_path": "/images/go.png",
-                "content": (
-                   ""
-                ),
-            },
+            
            
         ]
 
