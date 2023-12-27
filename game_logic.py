@@ -153,6 +153,31 @@ class GameLogic:
         GameLogic.temp_captured = 0
 
     @staticmethod
+    def calculate_territories():
+        row = len(GameLogic.board)
+        col = len(GameLogic.board[0])
+        black_territories = 0
+        white_territories = 0
+
+        def confirm_territory(y, x):
+            neighbours = GameLogic.board[y][x].get_neighbours()
+            color = neighbours[0].type
+            for piece in neighbours:
+                if piece.type != color:
+                    return None
+            return color
+            
+        for i in range(row):
+            for j in range(col):
+                if GameLogic.board[i][j].type == 0:      # if the current position is an empty spot
+                    result = confirm_territory(i, j)
+                    if result == 1:
+                        black_territories += 1 
+                    if result == 2:
+                        white_territories += 1 
+        return black_territories, white_territories
+
+    @staticmethod
     def check_suicide_for(piece):
         neighbours = piece.get_neighbours()
         groups = [piece.group for piece in neighbours if piece.group is not None]

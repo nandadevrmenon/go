@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QCheckBox,
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont
 from PrimaryButton import PrimaryButton
 from SecondaryButton import SecondaryButton
@@ -25,6 +25,8 @@ from PyQt6.QtGui import QAction
 
 class StartScreen(QMainWindow):
     from styles import colors
+
+    back_to_start_signal = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -66,7 +68,7 @@ class StartScreen(QMainWindow):
         logo_font = QFont(get_tan_nimbus(), 70)
         main_logo_label.setFont(logo_font)
         main_logo_label.setStyleSheet(f"color:{colors['yellow']}")
-        main_logo_label.setFixedHeight(70)
+        # main_logo_label.setFixedHeight(70)
 
         main_logo_subtext = QLabel("The 2 player strategy game")
         main_logo_subtext.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -156,9 +158,10 @@ class StartScreen(QMainWindow):
 
         if player1_valid and player2_valid:
             self.game_screen = GameScreen(
-                player1, player2, is_speed_go, is_handicap
+                player1, player2, is_speed_go, is_handicap, self.back_to_start_signal
             )  # we create a new game screen with the player names and the mode
-            self.game_screen.back_to_start_signal.connect(
+
+            self.back_to_start_signal.connect(
                 self.show_start_screen
             )  # this is a custom signal fromt he game screen that opens the startscreen again withtou using circular imports
             self.game_screen.show()  # show the game screen

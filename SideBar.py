@@ -142,7 +142,7 @@ class SideBar(QWidget):
         self.total_label.setContentsMargins(0, 5, 0, 10)
 
         # player 1's name
-        territory_label = QLabel("Territory")
+        territory_label = QLabel("Stones")
         territory_label.setFont(statliches_heading3)
         territory_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         territory_label.setStyleSheet(font_color_white)
