@@ -90,8 +90,12 @@ class GameScreen(QMainWindow):
         button_dock_layout.addSpacerItem(spacer)
         button_dock_layout.addWidget(pass_button)
         button_dock_layout.addWidget(resign_button)
-        button_dock_layout.addWidget(pause_button)
-        button_dock_layout.addWidget(reset_button)
+        if not self.is_speed_go:
+            button_dock_layout.addWidget(reset_button)
+            del pause_button
+        else:
+            del reset_button
+            button_dock_layout.addWidget(pause_button)
         button_dock_layout.addStretch()
 
         center_board = QHBoxLayout()
@@ -134,6 +138,7 @@ class GameScreen(QMainWindow):
         self.switch_timers()
 
     def check_passes(self):
+        print(self.passed)
         if self.passed:
             self.end_game()
         else:
@@ -154,7 +159,7 @@ class GameScreen(QMainWindow):
             self.p2_side.reset_timer()
         self.p1_side.default_turn_animation()
         self.p2_side.default_turn_animation()
-
+        self.board.move_validity = None
         self.redraw_board()
 
     def undo_board(self):
@@ -182,6 +187,7 @@ class GameScreen(QMainWindow):
             self.p2_side.update_score()
             self.switch_timers()
             self.passed = False
+            print(self.passed)
 
     def redraw_board(self):
         self.board.update()
@@ -193,10 +199,10 @@ class GameScreen(QMainWindow):
         GameLogic.player2["timer"].stop()
         self.p1_side.stop_turn_animation()
         self.p2_side.stop_turn_animation()
-        end_dialog = GameEndDialog( 
+        end_dialog = GameEndDialog(
             GameLogic.player1,
             GameLogic.player2,
-            )  # show the confirm quit dialog
+        )  # show the confirm quit dialog
         end_dialog.exec()
 
     def switch_timers(self):
