@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (
     QSizePolicy,
     QVBoxLayout,
 )
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal
+from PyQt6.QtCore import pyqtBoundSignal, pyqtSignal
 from PyQt6.QtGui import QAction, QIcon
 
 import sys
@@ -20,6 +20,7 @@ from game_logic import GameLogic
 from GameEndDialogue import GameEndDialog
 from IconButton import IconButton
 from PauseDialog import PauseDialog
+from ResignDialog import ResignDialog
 
 # from DrawingArea import DrawingArea
 # from HelpDialog import HelpDialog
@@ -27,12 +28,10 @@ from PauseDialog import PauseDialog
 
 
 class GameScreen(QMainWindow):
-    back_to_start_signal = pyqtSignal()
-
-    def __init__(self, p1Name, p2Name, is_speed_go, is_handicap):
+    def __init__(self, p1Name, p2Name, is_speed_go, is_handicap, back_to_start_signal):
         super().__init__()
         self.board = Board(self.try_move)
-
+        self.back_to_start_signal = back_to_start_signal
         self.is_game_running = True
         self.is_game_started = False
         self.game_logic = GameLogic(p1Name, p2Name)
@@ -252,7 +251,8 @@ class GameScreen(QMainWindow):
         self.game_logic.reset_board()
         GameLogic.player1["score"] = [0, 0]
         GameLogic.player2["score"] = [0, 0]
-
+        self.undo_button.setDisabled(True)
+        self.redo_button.setDisabled(True)
         self.p1_side.update_score()
         self.p2_side.update_score()
         if self.is_speed_go:
@@ -283,7 +283,8 @@ class GameScreen(QMainWindow):
             self.redo_button.setDisabled(not GameLogic.redo_is_possible())
 
     def resign_from_game(self):
-        # show which plyer lost in the Reisgn dialog and thats the end of it .
+        dialog = ResignDialog(self.reset_game, self.back_to_start_signal)
+        dialog.exec()
         print(GameLogic.current_player["name"], "has resigned")
         pass
 
