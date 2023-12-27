@@ -299,8 +299,7 @@ class GameScreen(QMainWindow):
         self.p1_side.stop_turn_animation()
         self.p2_side.stop_turn_animation()
         end_dialog = GameEndDialog(
-            GameLogic.player1,
-            GameLogic.player2,
+            self.reset_game, self.back_to_start_signal
         )  # show the confirm quit dialog
         end_dialog.exec()
 
