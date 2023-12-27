@@ -205,7 +205,7 @@ class GameLogic:
 
     @staticmethod
     def undo_board():
-        if GameLogic.turn > 2:
+        if GameLogic.undo_is_possible():
             GameLogic.turn -= 1
             prev_board, prev_groups = GameLogic.make_board_from_state(
                 GameLogic.board_states[GameLogic.turn - 1]
@@ -218,8 +218,14 @@ class GameLogic:
             return True
         return False
 
+    def undo_is_possible():
+        return GameLogic.turn > 2
+
+    def redo_is_possible():
+        return GameLogic.turn < len(GameLogic.board_states)
+
     def redo_board():
-        if GameLogic.turn < len(GameLogic.board_states):
+        if GameLogic.redo_is_possible():
             next_board, next_groups = GameLogic.make_board_from_state(
                 GameLogic.board_states[GameLogic.turn]
             )

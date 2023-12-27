@@ -35,7 +35,6 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.group_animation_finished = False
         self.group_animation_timer.start(30)
 
-
         self.x = None
         self.y = None
         self.move_validity = None
@@ -58,15 +57,6 @@ class Board(QFrame):  # base the board on a QFrame widget
             [7, 7, 7, 7, 7, 7, 7, 7, 7],
         )  # TODO - DONE create a 2d int/Piece array to store the state of the game
         # self.printBoardArray()  # TODO - DONE uncomment this method after creating the array above
-
-    def printBoardArray(self):
-        """prints the boardArray to console in an attractive way"""
-        print("boardArray:")
-        print(
-            "\n".join(
-                ["\t".join([str(cell) for cell in row]) for row in self.boardArray]
-            )
-        )
 
     def mousePosToColRow(self, event):
         """convert the mouse click event to a row and column"""
@@ -96,7 +86,7 @@ class Board(QFrame):  # base the board on a QFrame widget
     def paintEvent(self, event):
         """paints the board and the pieces of the game"""
         painter = QPainter(self)
-        painter.setPen(QPen(QColor(0,0,0,0)))
+        painter.setPen(QPen(QColor(0, 0, 0, 0)))
         self.drawBoardSquares(painter)
         self.drawPieces(painter)
         self.animatePieces(painter)
@@ -111,9 +101,8 @@ class Board(QFrame):  # base the board on a QFrame widget
         # convert the mouse click coordinate to row & col index on the board
         row = clickPos.x() // (self.height() // 7)
         col = clickPos.y() // (self.width() // 7)
-        pieceType = 1 if GameLogic.current_player == GameLogic.player1 else 2
-        self.move_validity = GameLogic.try_move(
-            pieceType, col, row
+        self.move_validity = self.try_move(
+            col, row
         )  # how should this try move should be
 
         self.x = row
@@ -238,7 +227,7 @@ class Board(QFrame):  # base the board on a QFrame widget
     def animatePieces(self, painter):
         row = self.y
         col = self.x
-        print(self.x, self.y)
+        print(self.x, self.y, self.move_validity)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         pieceColor = QColor(0,0,0,0)
         if self.move_validity is None or (self.x is None and self.y is None):
@@ -256,7 +245,10 @@ class Board(QFrame):  # base the board on a QFrame widget
             # Draw the piece
             painter.setBrush(pieceColor)
             painter.drawEllipse(
-                QPoint((col + 1) * int(self.squareWidth()), (row + 1) * int(self.squareHeight())),
+                QPoint(
+                    (col + 1) * int(self.squareWidth()),
+                    (row + 1) * int(self.squareHeight()),
+                ),
                 self.animation_radius,
                 self.animation_radius,
             )
@@ -275,47 +267,51 @@ class Board(QFrame):  # base the board on a QFrame widget
             )
 
     def updateAnimation(self):
-        if self.move_validity: # valid move - shrink effect
-            if not self.animation_finished: 
-                self.animation_radius -= 1 # decrease the radius 
-                if self.animation_radius == int((self.squareWidth() - 2) / 2.2): # stop animated when reach the radius of the pieces
-                    self.animation_finished = True
-                    self.animation_timer.stop()
-        else:
-            if not self.animation_finished: #invalid move - red pieces
-                self.opacity -= 0.05  # Decrease opacity 
-            if self.opacity <= 0:   # stop animated when reach the opacity is 0
+        if self.move_validity:
+            if not self.animation_finished:
+                self.animation_radius -= 1
+                self.update()
+            if self.animation_radius == int((self.squareWidth() - 2) / 2.2):
                 self.animation_finished = True
+                self.move_validity = None
                 self.animation_timer.stop()
-
+        else:
+            if not self.animation_finished:
+                self.opacity -= 0.05  # Decrease opacity (change this value as needed)
+                self.update()
+            if self.opacity <= 0:
+                print(self.x, self.y, self.move_validity)
+                self.animation_finished = True
+                self.move_validity = None
+                self.animation_timer.stop()
+                return
             # Trigger widget repaint
-        self.update()
 
     def capturedAnimation(self, painter, captured_group):
         for i in captured_group:
             if i[2] == 1: # check the type of peices and set the brushColor
                 color = QColor(0, 0, 0, int(self.group_opacity * 255))
-            else: 
+            else:
                 color = QColor(255, 255, 255, int(self.group_opacity * 255))
- 
+
             painter.setBrush(color)
             painter.drawEllipse(
-                    QPoint(
-                        (i[0] + 1) * int(self.squareWidth()),
-                        (i[1] + 1) * int(self.squareHeight()),
-                    ),
-                    self.animation_radius,
-                    self.animation_radius
-                )
-        
+                QPoint(
+                    (i[0] + 1) * int(self.squareWidth()),
+                    (i[1] + 1) * int(self.squareHeight()),
+                ),
+                self.animation_radius,
+                self.animation_radius,
+            )
+
     def update_captured_animation(self):
         if not self.group_animation_finished:
             self.group_opacity -= 0.05  # Decrease opacity 
             if self.group_opacity <= 0:
                 self.group_animation_finished = True
+                self.move_validity = None
                 self.group_animation_timer.stop()
 
-    
     def get_statliches_font(self):
         font_path = QtCore.QDir.currentPath() + "/fonts/statliches.ttf"
         font_id = QFontDatabase.addApplicationFont(font_path)  # load font
