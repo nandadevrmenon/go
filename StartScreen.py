@@ -17,6 +17,7 @@ from PyQt6.QtGui import QFontDatabase
 from QuitDialog import QuitDialog
 from GameScreen import GameScreen
 from styles import colors
+from PyQt6.QtGui import QAction
 
 
 # from QuitDialog import QuitDialog
@@ -30,6 +31,23 @@ class StartScreen(QMainWindow):
         self.init_ui()
 
     def init_ui(self):
+        self.setStyleSheet(
+            """
+            background-color: #141414;
+            
+            QMenuBar{
+            background-color: #141414;
+            color:white;
+            }
+            QMenu {
+                background-color: #141414;
+                color:white;
+            }
+            QMenu::item {
+                color: white;
+            }
+        """
+        )
         # set up the main user interface
         central_widget = QWidget()
         central_widget.setStyleSheet(f"background-color: {colors['light black']};")
@@ -111,6 +129,21 @@ class StartScreen(QMainWindow):
         main_grid_layout.addWidget(submit_button, 10, 0, 1, 5)
         main_grid_layout.addWidget(quit_button, 11, 0, 1, 5)
 
+        # create a menu bar
+        mainMenu = self.menuBar()
+        mainMenu.setNativeMenuBar(False)
+        help_menu = mainMenu.addMenu("Help")
+
+        # help section shortcut
+        help = QAction("Instructions", self)
+        help_menu.addAction(help)
+        help.triggered.connect(self.do_nothing)
+
+        # about the game short cut
+        about = QAction("About", self)
+        help_menu.addAction(about)
+        about.triggered.connect(self.do_nothing)
+
     def show_game_screen(self):
         player1 = self.player1_name.text()  # get the names of the two players
         player2 = self.player2_name.text()
@@ -164,6 +197,9 @@ class StartScreen(QMainWindow):
 
         # else
         return True, ""
+
+    def do_nothing(self):
+        print("doing nothign ")
 
 
 def get_tan_nimbus():  # gets the font used for tehe logo of the app

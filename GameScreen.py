@@ -15,13 +15,11 @@ from SideBar import SideBar
 from QuitDialog import QuitDialog
 from board import Board
 from PrimaryButton import PrimaryButton
-import math
 
 from game_logic import GameLogic
 from GameEndDialogue import GameEndDialog
 from IconButton import IconButton
 from PauseDialog import PauseDialog
-from PyQt6.QtGui import QKeySequence
 
 # from DrawingArea import DrawingArea
 # from HelpDialog import HelpDialog
