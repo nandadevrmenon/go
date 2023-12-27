@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (
     QStackedWidget,
     QSizePolicy,
     QScrollArea,
-    QApplication, 
+    QApplication,
 )
 from PyQt6.QtGui import QIcon, QFont, QFontDatabase, QPixmap
 from SecondaryButton import SecondaryButton
@@ -17,13 +17,14 @@ from PyQt6 import QtCore
 
 
 class HelpDialog(QDialog):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):
+        super().__init__(parent)
         # main widget setup
         self.setWindowTitle("Help")
         self.setStyleSheet("background-color: #070114;")
         self.setFixedHeight(500)
         self.setFixedWidth(420)
+        self.setModal(False)
 
         self.stacked_widget = QStackedWidget()  # stacked widget with mutliple pages
 
@@ -37,7 +38,6 @@ class HelpDialog(QDialog):
                     "a strategic board game originating from ancient China. "
                     "It's known for its simple rules yet immense strategic depth, making it one"
                     " of the most complex and captivating strategy games."
-                    
                 ),
             },
             {
@@ -93,7 +93,7 @@ class HelpDialog(QDialog):
                     "In A , White cannot play at the point marked with a circle. White would have no liberties "
                     "and be immediately recaptured. This is called suicide, and is forbidden in most rulesets. "
                     "However, in B (bottom-left), the two Black stones also only have one liberty left. In this case, "
-                    "White can play at the point marked with a circle. This would capture the Black stones. C shows the result." 
+                    "White can play at the point marked with a circle. This would capture the Black stones. C shows the result."
                 ),
             },
             {
@@ -105,7 +105,7 @@ class HelpDialog(QDialog):
                     "However, Black could also play at the square, and resulted A "
                     "The rule of ko: A stone captured in ko cannot be recaptured immediately. "
                     "You must wait at least one turn before recapturing a stone in the ko position."
-                                 ),
+                ),
             },
             {
                 "title": "Scoring System",
@@ -115,8 +115,6 @@ class HelpDialog(QDialog):
                     "and then subtracts the number of stones that were captured by the opponent."
                 ),
             },
-            
-           
         ]
 
         self.current_page = 0  # start with first page
@@ -151,24 +149,24 @@ class HelpDialog(QDialog):
         title_label.setWordWrap(True)
         title_label.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
 
-        image_label = QLabel(self) # image with 10 px pading and centered
+        image_label = QLabel(self)  # image with 10 px pading and centered
         pixmap = QPixmap(QtCore.QDir.currentPath() + image_path)
         image_label.setPixmap(pixmap)
         image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         image_label.setStyleSheet("QLabel { padding: 10px; }")
-        
+
         content_label = QLabel(content)  # readable text that is white and word wrapped
         content_label.setFont(QFont("Helvetica", 16))
         content_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         content_label.setStyleSheet("color: white;")
         content_label.setWordWrap(True)
 
-        scroll_area = QScrollArea(page) # Make the content inside the scrollable
-        scroll_area.setWidgetResizable(True)  
+        scroll_area = QScrollArea(page)  # Make the content inside the scrollable
+        scroll_area.setWidgetResizable(True)
         scroll_widget = QWidget()
-        scroll_layout = QVBoxLayout(scroll_widget)  
-        scroll_layout.addWidget(content_label)  
-        scroll_area.setWidget(scroll_widget)  
+        scroll_layout = QVBoxLayout(scroll_widget)
+        scroll_layout.addWidget(content_label)
+        scroll_area.setWidget(scroll_widget)
 
         layout = QVBoxLayout(page)
         layout.setSpacing(0)
@@ -200,10 +198,3 @@ class HelpDialog(QDialog):
             return QFontDatabase.applicationFontFamilies(font_id)[0]
         else:
             return "Helvetica"  # fallback
-        
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    help_dialog = HelpDialog()
-    help_dialog.setGeometry(2000, 100, 400, 400)
-    help_dialog.show()
-    sys.exit(app.exec())

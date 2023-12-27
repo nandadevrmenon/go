@@ -3,6 +3,7 @@ from PyQt6.QtCore import Qt, QTimer
 
 
 class GameLogic:
+    # initialize static class variables
     player1 = None
     player2 = None
     current_player = None
@@ -14,19 +15,31 @@ class GameLogic:
     temp_captured = 0
 
     def __init__(self, p1Name=None, p2Name=None):
-        if p1Name is not None and p2Name is not None:
+        if (
+            p1Name is not None and p2Name is not None
+        ):  # if the names provided are not none
+            # create player dictionaries
             GameLogic.player1 = {"name": p1Name, "score": [0, 0], "timer": QTimer()}
             GameLogic.player2 = {"name": p2Name, "score": [0, 0], "timer": QTimer()}
+
+            # set current player
             GameLogic.current_player = GameLogic.player1
+
+            # temp variable for score management
             GameLogic.temp_captured = 0
 
+            # records all previous board states for undo redo functionality
             GameLogic.board_states = [
                 None,
             ]
-            GameLogic.board = []
-            GameLogic.all_groups = []
-            GameLogic.score_states = [None, {"p1": [0, 0], "p2": [0, 0]}]
+            GameLogic.board = []  # actual board of pieces
+            GameLogic.all_groups = []  # the groups present on the board
+            GameLogic.score_states = [
+                None,
+                {"p1": [0, 0], "p2": [0, 0]},
+            ]  # similar to baord states but for player scores
 
+            # fill the board with pieces
             for i in range(7):
                 GameLogic.board.append([])
                 for j in range(7):
@@ -166,15 +179,17 @@ class GameLogic:
                 if piece.type != color:
                     return None
             return color
-            
+
         for i in range(row):
             for j in range(col):
-                if GameLogic.board[i][j].type == 0:      # if the current position is an empty spot
+                if (
+                    GameLogic.board[i][j].type == 0
+                ):  # if the current position is an empty spot
                     result = confirm_territory(i, j)
                     if result == 1:
-                        black_territories += 1 
+                        black_territories += 1
                     if result == 2:
-                        white_territories += 1 
+                        white_territories += 1
         return black_territories, white_territories
 
     @staticmethod
@@ -303,49 +318,3 @@ class GameLogic:
         print(str(GameLogic.player1["score"]), str(GameLogic.player2["score"]))
 
     # main static variable and static class instantiation
-
-
-if __name__ == "__main__":
-    logic = GameLogic("hello", "ruh")
-    # board, groups = GameLogic.make_board_from_state(
-    #     [
-    #         [0, 0, 0, 0, 0, 0, 0],
-    #         [0, 0, 0, 0, 0, 0, 0],
-    #         [0, 0, 0, 0, 0, 0, 0],
-    #         [0, 0, 0, 0, 0, 0, 0],
-    #         [0, 0, 0, 0, 0, 2, 2],
-    #         [0, 0, 0, 0, 2, 0, 1],
-    #         [0, 0, 0, 0, 0, 2, 1],
-    #     ]
-    # )
-
-    # board, groups = GameLogic.make_board_from_state(
-    #     [
-    #         [0, 0, 0, 0, 0, 0, 0],
-    #         [0, 0, 0, 0, 0, 0, 0],
-    #         [0, 0, 0, 0, 0, 0, 0],
-    #         [0, 0, 0, 0, 0, 0, 0],
-    #         [0, 0, 0, 0, 0, 0, 0],
-    #         [0, 0, 0, 0, 0, 0, 0],
-    #         [0, 0, 0, 0, 0, 0, 0],
-    #     ]
-    # )
-
-    # GameLogic.board = board
-    # GameLogic.all_groups = groups
-    # GameLogic.record_board_state()
-    black = True
-    while True:
-        # Get row and column input
-        row_input = int(input("Enter y value the row()"))
-        column_input = int(input("Enter x value which is the column "))
-        undo_input = str(input("Undo Redo ?"))
-        if undo_input == "u":
-            GameLogic.undo_board()
-        elif undo_input == "r":
-            GameLogic.redo_board()
-        elif GameLogic.try_move(1 if black else 2, row_input, column_input):
-            black = not black
-        GameLogic.print_board(GameLogic.board)
-        print(len(GameLogic.board_states), len(GameLogic.score_states), GameLogic.turn)
-        print(str(GameLogic.score_states))

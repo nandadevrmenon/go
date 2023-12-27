@@ -22,9 +22,7 @@ from IconButton import IconButton
 from PauseDialog import PauseDialog
 from HelpDialog import HelpDialog
 from ResignDialog import ResignDialog
-# from DrawingArea import DrawingArea
-# from HelpDialog import HelpDialog
-# from AboutDialog import AboutDialog
+from AboutDialog import AboutDialog
 
 
 class GameScreen(QMainWindow):
@@ -41,6 +39,7 @@ class GameScreen(QMainWindow):
 
         self.passed = False
 
+        self.help_dialog = HelpDialog(self)
         # set window appearance
         self.setWindowTitle("Go")
         self.setStyleSheet(
@@ -219,7 +218,7 @@ class GameScreen(QMainWindow):
         about = QAction("About", self)
         about.setShortcut("A")
         help_menu.addAction(about)
-        about.triggered.connect(self.do_nothing)
+        about.triggered.connect(self.open_about_dialog)
 
     def start_game(self):
         self.switch_timers()
@@ -285,6 +284,7 @@ class GameScreen(QMainWindow):
     def resign_from_game(self):
         dialog = ResignDialog(self.reset_game, self.back_to_start_signal)
         dialog.exec()
+        self.help_dialog.close()
         print(GameLogic.current_player["name"], "has resigned")
         pass
 
@@ -301,6 +301,7 @@ class GameScreen(QMainWindow):
         end_dialog = GameEndDialog(
             self.reset_game, self.back_to_start_signal
         )  # show the confirm quit dialog
+        self.help_dialog.close()
         end_dialog.exec()
 
     def switch_timers(self):
@@ -326,17 +327,8 @@ class GameScreen(QMainWindow):
         GameLogic.current_player["timer"].start()
 
     def instruction_widget(self):
-        help_dialog = HelpDialog()
-        help_dialog.exec()
+        self.help_dialog.show()
 
-    def do_nothing(self):
-        print("doing nothing ")
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = GameScreen(
-        "bruh", "hello", False, False
-    )  # open the start screen of the game
-    window.show()
-    app.exec()  # start the event loop running
+    def open_about_dialog(self):
+        dialog = AboutDialog()
+        dialog.exec()
