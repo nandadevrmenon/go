@@ -10,6 +10,7 @@ from PrimaryButton import PrimaryButton
 import math
 
 from game_logic import GameLogic
+from GameEndDialogue import GameEndDialog
 
 # from DrawingArea import DrawingArea
 # from HelpDialog import HelpDialog
@@ -163,9 +164,17 @@ class GameScreen(QMainWindow):
         self.board.update()
 
     def end_game(self):
-        # FLORRYN
         # call the game end dialogue and edit it so that it calculated the scores and displays it tot he suer. you might have to change the colours as well.
-        pass
+        self.is_game_running = False
+        GameLogic.player1["timer"].stop()
+        GameLogic.player2["timer"].stop()
+        self.p1_side.stop_turn_animation()
+        self.p2_side.stop_turn_animation()
+        end_dialog = GameEndDialog( 
+            GameLogic.player1,
+            GameLogic.player2,
+            )  # show the confirm quit dialog
+        end_dialog.exec()
 
     def switch_timers(self):
         if GameLogic.current_player == GameLogic.player1:
