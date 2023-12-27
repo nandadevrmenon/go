@@ -111,8 +111,8 @@ class HelpDialog(QDialog):
                 "title": "Scoring System",
                 "image_path": "/images/go.png",
                 "content": (
-                    "Each player counts the number of unoccupied points surrounded by their stones (Territory) "
-                    "and then subtracts the number of stones that were captured by the opponent."
+                    "The final score are calculated such as \n"
+                    "the number of stones placed on the board + captured opponent pieces + territories + kumi(if any)"
                 ),
             },
             
