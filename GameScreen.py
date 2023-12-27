@@ -20,6 +20,8 @@ import math
 from game_logic import GameLogic
 from GameEndDialogue import GameEndDialog
 from IconButton import IconButton
+from PauseDialog import PauseDialog
+from PyQt6.QtGui import QKeySequence
 
 # from DrawingArea import DrawingArea
 # from HelpDialog import HelpDialog
@@ -49,11 +51,11 @@ class GameScreen(QMainWindow):
             background-color: #141414;
             
             QMenuBar{
-            background-color: #070114;
+            background-color: #141414;
             color:white;
             }
             QMenu {
-                background-color: #070114;
+                background-color: #141414;
                 color:white;
             }
             QMenu::item {
@@ -78,13 +80,21 @@ class GameScreen(QMainWindow):
         undo_icon = QIcon("images/undo.png")
         redo_icon = QIcon("images/redo.png")
 
-        self.undo_button = IconButton(undo_icon, self.undo_board, "Undo Move")
-        self.redo_button = IconButton(redo_icon, self.redo_board, "Redo Move")
+        self.undo_button = IconButton(
+            undo_icon,
+            self.undo_board,
+            ("Disabled in Speed Go" if is_speed_go else "Undo Move"),
+        )
+        self.redo_button = IconButton(
+            redo_icon,
+            self.redo_board,
+            ("Disabled in Speed Go" if is_speed_go else "Redo Move"),
+        )
         self.undo_button.setDisabled(True)
         self.redo_button.setDisabled(True)
         pass_button = PrimaryButton("Pass", self.check_passes)
         resign_button = PrimaryButton("Resign", self.resign_from_game)
-        pause_button = PrimaryButton("Pause", do_nothing)
+        pause_button = PrimaryButton("Pause", self.pause_game)
         reset_button = PrimaryButton("Reset", self.reset_game)
 
         spacer = QSpacerItem(
@@ -143,6 +153,77 @@ class GameScreen(QMainWindow):
         self.setCentralWidget(central_widget)
         central_widget.setLayout(main_layout)
 
+        # create a menu bar
+        mainMenu = self.menuBar()
+        mainMenu.setNativeMenuBar(False)
+        game_menu = mainMenu.addMenu(
+            "Game"
+        )  # add the "Brush Size" menu to the menu bar
+        move_menu = mainMenu.addMenu("Move")
+        help_menu = mainMenu.addMenu("Help")
+
+        # clear
+        pause_action = QAction("Pause", self)
+        pause_action.setShortcut("Space")
+        game_menu.addAction(pause_action)
+        if not is_speed_go:
+            pause_action.setEnabled(False)
+        pause_action.triggered.connect(self.pause_game)
+        #  # when the menu option is selected or the shortcut is used the clear slot is triggered
+
+        # save menu item
+        pass_action = QAction(
+            "Pass", self
+        )  # create a save action with a png as an icon
+        pass_action.setShortcut(
+            "Ctrl+P"
+        )  # connect this save action to a keyboard shortcut,
+        game_menu.addAction(pass_action)
+        pass_action.triggered.connect(self.check_passes)
+
+        # exit short cut
+        resign_action = QAction("Resign", self)
+        resign_action.setShortcut("Ctrl+X")
+        resign_action.triggered.connect(self.resign_from_game)
+        game_menu.addAction(resign_action)
+
+        # clear
+        reset_action = QAction("Reset", self)
+        reset_action.setShortcut("Ctrl+R")
+        game_menu.addAction(reset_action)
+        if is_speed_go:
+            reset_action.setEnabled(False)
+        reset_action.triggered.connect(self.reset_game)
+        #  # when the menu option is selected or the shortcut is used the clear slot is triggered
+
+        # exit short cut
+        undo_action = QAction("Undo", self)
+        undo_action.setShortcut("U")
+        undo_action.triggered.connect(self.undo_board)
+        if is_speed_go:
+            undo_action.setEnabled(False)
+        move_menu.addAction(undo_action)
+
+        # exit short cut
+        redo_action = QAction("Redo", self)
+        redo_action.setShortcut("R")
+        redo_action.triggered.connect(self.redo_board)
+        if is_speed_go:
+            redo_action.setEnabled(False)
+        move_menu.addAction(redo_action)
+
+        # help section shortcut
+        help = QAction("Instructions", self)
+        help.setShortcut("I")
+        help_menu.addAction(help)
+        help.triggered.connect(self.do_nothing)
+
+        # about the game short cut
+        about = QAction("About", self)
+        about.setShortcut("A")
+        help_menu.addAction(about)
+        about.triggered.connect(self.do_nothing)
+
     def start_game(self):
         self.switch_timers()
 
@@ -155,8 +236,9 @@ class GameScreen(QMainWindow):
             self.p2_side.update_score()
             self.switch_timers()
             self.passed = False
-            self.undo_button.setDisabled(not GameLogic.undo_is_possible())
-            self.redo_button.setDisabled(not GameLogic.redo_is_possible())
+            if not self.is_speed_go:
+                self.undo_button.setDisabled(not GameLogic.undo_is_possible())
+                self.redo_button.setDisabled(not GameLogic.redo_is_possible())
 
     def check_passes(self):
         print(self.passed)
@@ -188,6 +270,8 @@ class GameScreen(QMainWindow):
         if GameLogic.undo_board():
             self.switch_timers()
             self.redraw_board()
+            self.p1_side.update_score()
+            self.p2_side.update_score()
             self.redo_button.setDisabled(False)
             self.undo_button.setDisabled(not GameLogic.undo_is_possible())
 
@@ -195,6 +279,8 @@ class GameScreen(QMainWindow):
         if GameLogic.redo_board():
             self.switch_timers()
             self.redraw_board()
+            self.p1_side.update_score()
+            self.p2_side.update_score()
             self.undo_button.setDisabled(False)
             self.redo_button.setDisabled(not GameLogic.redo_is_possible())
 
@@ -234,9 +320,15 @@ class GameScreen(QMainWindow):
             self.p2_side.start_turn_animation()
             self.p1_side.stop_turn_animation()
 
+    def pause_game(self):
+        GameLogic.player2["timer"].stop()  # stop the timer for player 1
+        GameLogic.player1["timer"].stop()
+        pause_dialog = PauseDialog()
+        pause_dialog.exec()
+        GameLogic.current_player["timer"].start()
 
-def do_nothing():
-    pass
+    def do_nothing(self):
+        print("doing nothing ")
 
 
 if __name__ == "__main__":
