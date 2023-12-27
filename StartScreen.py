@@ -8,23 +8,20 @@ from PyQt6.QtWidgets import (
     QCheckBox,
 )
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QFont, QFontDatabase
+from PyQt6 import QtCore
 from PrimaryButton import PrimaryButton
 from SecondaryButton import SecondaryButton
-from PyQt6 import QtCore
-from PyQt6 import QtCore
-from PyQt6.QtGui import QFontDatabase
 from QuitDialog import QuitDialog
 from GameScreen import GameScreen
-from styles import colors
 from PyQt6.QtGui import QAction
-
-
-# from QuitDialog import QuitDialog
+from HelpDialog import HelpDialog
+from AboutDialog import AboutDialog
+from styles import colors
 
 
 class StartScreen(QMainWindow):
-    from styles import colors
+    from styles import colors  # class that has the colours
 
     back_to_start_signal = pyqtSignal()
 
@@ -68,7 +65,6 @@ class StartScreen(QMainWindow):
         logo_font = QFont(get_tan_nimbus(), 70)
         main_logo_label.setFont(logo_font)
         main_logo_label.setStyleSheet(f"color:{colors['yellow']}")
-        # main_logo_label.setFixedHeight(70)
 
         main_logo_subtext = QLabel("The 2 player strategy game")
         main_logo_subtext.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -136,15 +132,16 @@ class StartScreen(QMainWindow):
         mainMenu.setNativeMenuBar(False)
         help_menu = mainMenu.addMenu("Help")
 
+        self.help_dialog = HelpDialog()
         # help section shortcut
         help = QAction("Instructions", self)
         help_menu.addAction(help)
-        help.triggered.connect(self.do_nothing)
+        help.triggered.connect(self.help_dialog.show)
 
         # about the game short cut
         about = QAction("About", self)
         help_menu.addAction(about)
-        about.triggered.connect(self.do_nothing)
+        about.triggered.connect(self.open_about_dialog)
 
     def show_game_screen(self):
         player1 = self.player1_name.text()  # get the names of the two players
@@ -166,6 +163,7 @@ class StartScreen(QMainWindow):
             )  # this is a custom signal fromt he game screen that opens the startscreen again withtou using circular imports
             self.game_screen.show()  # show the game screen
             self.close()  # close the start screen
+            self.help_dialog.close()
         else:
             if not player1_valid:  # is any name is not valid
                 self.player1_name.clear()  # we clear that input
@@ -180,6 +178,7 @@ class StartScreen(QMainWindow):
         self.player1_name.clear()  # we clear the inputs
         self.player2_name.clear()
         self.game_screen.close()  # close the game screen
+        self.game_screen.help_dialog.close()
         self.show()  # and re open the start screen
 
     def show_quit_confirmation(self):
@@ -201,8 +200,9 @@ class StartScreen(QMainWindow):
         # else
         return True, ""
 
-    def do_nothing(self):
-        print("doing nothign ")
+    def open_about_dialog(self):
+        dialog = AboutDialog()
+        dialog.exec()
 
 
 def get_tan_nimbus():  # gets the font used for tehe logo of the app

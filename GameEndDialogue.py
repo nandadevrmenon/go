@@ -37,10 +37,16 @@ class GameEndDialog(QDialog):
         label.setStyleSheet("color: white;")
 
         score_label = QLabel("")  # sec lable
-        self.set_score_text(score_label)  # adds  the name of the winner to the label
         score_label.setFont(QFont(self.get_statliches(), 20))
         score_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         score_label.setStyleSheet("color: white;")
+
+        self.opponent_score_label = QLabel()
+        self.opponent_score_label.setFont(QFont(self.get_statliches(), 20))
+        self.opponent_score_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.opponent_score_label.setStyleSheet("color: white;")
+
+        self.set_score_text(score_label)  # adds  the name of the winner to the label
 
         rematch_button = PrimaryButton("Rematch", self.rematch)
         new_game_button = PrimaryButton("New Game", self.new_game)
@@ -54,8 +60,9 @@ class GameEndDialog(QDialog):
         medal_image.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(medal_image, 3, 0, 1, 2)  # add the medal icon
         label.setStyleSheet("QLabel { line-height: 0px;color:white; }")
-        layout.addWidget(rematch_button, 4, 0, 1, 1)
-        layout.addWidget(new_game_button, 4, 1, 1, 1)
+        layout.addWidget(self.opponent_score_label, 4, 0, 1, 2)
+        layout.addWidget(rematch_button, 5, 0, 1, 1)
+        layout.addWidget(new_game_button, 5, 1, 1, 1)
         layout.update()  # to make sure empty rows are squshed
 
     def set_winner_text(
@@ -93,11 +100,17 @@ class GameEndDialog(QDialog):
             captured = self.player1["score"][1]
             territory = p1_territory
             total_score = p1_score
+            self.opponent_score_label.setText(
+                self.player2["name"] + " only had " + str(p2_score) + " points."
+            )
         else:
             stone = self.player2["score"][0]
             captured = self.player2["score"][1]
             territory = p2_territory
             total_score = p2_score
+            self.opponent_score_label.setText(
+                self.player1["name"] + " only had " + str(p1_score) + " points."
+            )
 
         score_label.setText(
             "Stones: "

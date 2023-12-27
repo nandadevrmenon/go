@@ -15,9 +15,9 @@ class Board(QFrame):  # base the board on a QFrame widget
 
     def __init__(self, try_move):
         super().__init__()
-        self.try_move = try_move
-        self.started = 4
-        self.initBoard()
+        self.try_move = try_move  # the try move call back that calls try move in the game logic and also updates the UI accordingly
+
+        self.initBoard()  # draw the inital board (which is only used for drawing the board)/ actual logical board in GameLogic
         self.setFixedWidth(640)
         self.setFixedHeight(640)
 
@@ -38,15 +38,12 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.group_animation_finished = False
         self.group_animation_timer.start(30)
 
+        # temp variables that hold the x y value of the pieces for the animations ,better to have class variables than passing it into every method
         self.x = None
         self.y = None
         self.move_validity = None
 
     def initBoard(self):
-        """initiates board"""
-
-        self.isStarted = False  # game is not currently started
-
         self.boardArray = (
             [7, 7, 7, 7, 7, 7, 7, 7, 7],
             [7, 0, 0, 0, 0, 0, 0, 0, 7],
@@ -59,9 +56,6 @@ class Board(QFrame):  # base the board on a QFrame widget
             [7, 7, 7, 7, 7, 7, 7, 7, 7],
         )  # TODO - DONE create a 2d int/Piece array to store the state of the game
         # self.printBoardArray()  # TODO - DONE uncomment this method after creating the array above
-        self.isStarted = (
-            True  # set the boolean which determines if the game has started to TRUE
-        )
 
     def squareWidth(self):
         """returns the width of one square in the board"""
@@ -76,12 +70,13 @@ class Board(QFrame):  # base the board on a QFrame widget
         painter = QPainter(self)
         painter.setPen(QPen(QColor(0, 0, 0, 0)))
         self.drawBoardSquares(painter)
-        self.drawPieces(painter)
-        self.animatePieces(painter)
-        
-        self.capturedAnimation(painter, self.captured_pieces)
-        # GameLogic
-        # self.animatePieces(painter)
+        self.drawPieces(painter)  # draws all pieces
+        self.animatePieces(
+            painter
+        )  # animates any pieces that were added in the last turn
+        self.capturedAnimation(
+            painter, self.captured_pieces
+        )  # animateds any pieces that were captureed in the last turn
 
     def mousePressEvent(self, event):
         """this event is automatically called when the mouse is pressed"""
@@ -90,23 +85,25 @@ class Board(QFrame):  # base the board on a QFrame widget
         # convert the mouse click coordinate to row & col index on the board
         row = clickPos.x() // (self.height() // 7)
         col = clickPos.y() // (self.width() // 7)
-        self.move_validity, self.captured_pieces = self.try_move(
-            col, row
-        )  # how should this try move should be
-        print(self.captured_pieces)
+        self.move_validity, self.captured_pieces = self.try_move(col, row)
+
         self.x = row
         self.y = col
 
         # reset timer for pieces animation
         if self.animation_timer.isActive():
             self.animation_timer.stop()
+
         self.animation_timer = QTimer(self)
         self.animation_timer.timeout.connect(self.updateAnimation)
+
         if self.move_validity:  # valid move animation
             self.animation_radius = int((self.squareWidth() - 2) / 2.2) + 10
             if self.captured_pieces != [] and self.group_opacity < 1:
                 self.group_animation_timer = QTimer(self)
-                self.group_animation_timer.timeout.connect(self.update_captured_animation)
+                self.group_animation_timer.timeout.connect(
+                    self.update_captured_animation
+                )
                 self.group_opacity = 1
                 self.group_animation_finished = False
                 self.group_animation_timer.start(30)
@@ -115,9 +112,6 @@ class Board(QFrame):  # base the board on a QFrame widget
             self.opacity = 1
         self.animation_finished = False
         self.animation_timer.start(30)
-
-        
-
 
         self.update()
 

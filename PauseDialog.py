@@ -11,7 +11,7 @@ from PyQt6.QtCore import Qt
 from styles import colors
 
 
-class PauseDialog(QDialog):
+class PauseDialog(QDialog):  # a dialog that just shows that the game is paused
     def __init__(
         self,
     ):
