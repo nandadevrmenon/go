@@ -29,6 +29,36 @@ class GameScreen(QMainWindow):
         self.game_logic = GameLogic(p1Name, p2Name)
         self.is_speed_go = is_speed_go
         self.is_handicap = is_handicap
+        
+        board, groups = GameLogic.make_board_from_state(
+            [
+                [0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 1, 1, 0, 0, 0],
+                [0, 1, 0, 0, 1, 0, 0],
+                [0, 1, 0, 0, 1, 0, 0],
+                [0, 0, 1, 1, 0, 2, 2],
+                [0, 0, 0, 0, 2, 0, 1],
+                [0, 0, 0, 0, 0, 2, 1],
+            ]
+        )
+
+     
+
+        # board, groups = GameLogic.make_board_from_state(
+        #     [
+        #         [0, 0, 0, 0, 0, 0, 0],
+        #         [0, 0, 0, 0, 0, 0, 0],
+        #         [0, 0, 0, 0, 0, 0, 0],
+        #         [0, 0, 0, 0, 0, 0, 0],
+        #         [0, 0, 0, 0, 0, 0, 0],
+        #         [0, 0, 0, 0, 0, 0, 0],
+        #         [0, 0, 0, 0, 0, 0, 0],
+        #     ]
+        # )
+
+        GameLogic.board = board
+        GameLogic.all_groups = groups
+        GameLogic.record_board_state()
 
         self.passed = False
 
