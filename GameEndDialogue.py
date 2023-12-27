@@ -46,7 +46,7 @@ class GameEndDialog(QDialog):
         medal_image.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(medal_image, 1, 0, 1, 2)  # add the medal icon
         self.setFixedHeight(350)  # update overall size of dialog
-        # label.setFixedHeight(75)
+        label.setFixedHeight(105)
         label.setStyleSheet("QLabel { line-height: 0px;color:white; }")
         layout.addWidget(quit_button, 2, 0, 1, 2)
         layout.update()  # to make sure empty rows are squshed
