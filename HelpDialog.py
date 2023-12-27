@@ -1,3 +1,4 @@
+import sys
 from PyQt6.QtWidgets import (
     QDialog,
     QVBoxLayout,
@@ -5,8 +6,10 @@ from PyQt6.QtWidgets import (
     QWidget,
     QStackedWidget,
     QSizePolicy,
+    QScrollArea,
+    QApplication, 
 )
-from PyQt6.QtGui import QIcon, QFont, QFontDatabase
+from PyQt6.QtGui import QIcon, QFont, QFontDatabase, QPixmap
 from SecondaryButton import SecondaryButton
 from PrimaryButton import PrimaryButton
 from PyQt6.QtCore import Qt
@@ -19,7 +22,7 @@ class HelpDialog(QDialog):
         # main widget setup
         self.setWindowTitle("Help")
         self.setStyleSheet("background-color: #070114;")
-        self.setFixedHeight(400)
+        self.setFixedHeight(500)
         self.setFixedWidth(420)
 
         self.stacked_widget = QStackedWidget()  # stacked widget with mutliple pages
@@ -28,49 +31,105 @@ class HelpDialog(QDialog):
         self.pages = [
             {
                 "title": "Welcome",
+                "image_path": "/images/go.png",
                 "content": (
-                    "Welcome to Pictionary, a fun 2-player drawing and guessing game! "
-                    "One player draws, and the other guesses. Earn points for guessing "
-                    "correctly or showcasing your drawing skills."
+                    "Welcome to Go Game, "
+                    "a strategic board game originating from ancient China. "
+                    "It's known for its simple rules yet immense strategic depth, making it one"
+                    " of the most complex and captivating strategy games."
+                    
                 ),
             },
             {
                 "title": "How to Play",
+                "image_path": "/images/how_to_play.png",
                 "content": (
-                    "- Take turns drawing and guessing.\n"
-                    "- Points: 1 for guessing, 2 for drawing.\n"
-                    "- A 1-minute timer adds excitement.\n"
-                    "- You can skip turns if needed."
+                    "The players take turns placing black and white pieces called stones on the grid. "
+                    "Black usually takes the first move and play one stone per turn."
+                    "The stones are placed where the lines intersect. These intersections are called points."
                 ),
             },
             {
-                "title": "Game Interaction",
+                "title": "Liberties",
+                "image_path": "/images/liberties.png",
                 "content": (
-                    "The timer starts when the drawer first sees the word. The drawer then has 1 minute to make the guesser guess the word."
-                    "The drawer can use multiple colours to draw on the canvas to show the guesser what the words is."
-                    "You also have the option to skip turns if it gets too challenging."
+                    "Once a stone is placed on the board, it cannot be moved unless it is captured."
+                    "Stones are captured when they have no liberties remaining."
+                    "Liberties refer to the open adjacent intersections surrounding a stone."
+                    "For instance, a stone positioned at the center of the board has four liberties, "
+                    "while a stone on the board's edge possesses three liberties. Stones placed in the corners "
+                    "of the board have only two liberties."
                 ),
             },
             {
-                "title": "Tips and Shortcuts",
+                "title": "Atari",
+                "image_path": "/images/atari.png",
                 "content": (
-                    "- Tooltips guide you on buttons.\n"
-                    "- Right-click a color to fill the canvas with that color.\n"
-                    "- Adjust brush size with Ctrl = or Ctrl -.\n"
-                    "- Shortcuts for saving, clearing, and more."
+                    "When a stone is left with only one liberty, it's termed 'in atari'. "
+                    "If the opposing player doesn't respond, those stones risk being captured on the next move"
                 ),
             },
             {
-                "title": "Shortcuts ",
-                "content": "- Ctrl + = to increase brush size\n- Ctrl + - to decrease brush size\n- Ctrl + 1 through Ctrl + 8 to cycle through colors\n- Return key to check answer\n- Ctrl + W to show/hide word\n- Ctrl + P for pen\n- Ctrl + E for eraser\n- Ctrl + U for uploading an image\n- Ctrl + Shift + H for help\n- Ctrl + / for about",
+                "title": "Captured",
+                "image_path": "/images/captured.png",
+                "content": (
+                    "Stones devoid of liberties are captured and taken off the board. "
+                    "These captured stones are set aside for scoring at the game's conclusion."
+                ),
             },
+            {
+                "title": "Group",
+                "image_path": "/images/groups.png",
+                "content": (
+                    "Connected stones of the same color form a group. Such groups share liberties. "
+                    "group 'A' has 6 liberties. To capture Black, White needs to occupy all 6 liberties, "
+                    "especially since group 'B' is in atari."
+                ),
+            },
+            {
+                "title": "Suicide Rule",
+                "image_path": "/images/suicide.png",
+                "content": (
+                    "In A , White cannot play at the point marked with a circle. White would have no liberties "
+                    "and be immediately recaptured. This is called suicide, and is forbidden in most rulesets. "
+                    "However, in B (bottom-left), the two Black stones also only have one liberty left. In this case, "
+                    "White can play at the point marked with a circle. This would capture the Black stones. C shows the result." 
+                ),
+            },
+            {
+                "title": "Ko Rule",
+                "image_path": "/images/ko.png",
+                "content": (
+                    "Ko is a situation in which Black and White could continue recapturing each other. "
+                    "In A, White can capture Black by playing at the square. B is the result. "
+                    "However, Black could also play at the square, and resulted A "
+                    "The rule of ko: A stone captured in ko cannot be recaptured immediately. "
+                    "You must wait at least one turn before recapturing a stone in the ko position."
+                                 ),
+            },
+            {
+                "title": "Scoring System",
+                "image_path": "/images/go.png",
+                "content": (
+                    "Each player counts the number of unoccupied points surrounded by their stones (Territory) "
+                    "and then subtracts the number of stones that were captured by the opponent."
+                ),
+            },
+            {
+                "title": "Empty",
+                "image_path": "/images/go.png",
+                "content": (
+                   ""
+                ),
+            },
+           
         ]
 
         self.current_page = 0  # start with first page
 
         for page_data in self.pages:
             page = self.create_page(
-                page_data["title"], page_data["content"]
+                page_data["title"], page_data["image_path"], page_data["content"]
             )  # for each element we create a page
             self.stacked_widget.addWidget(page)  # and add it to the main stacked widget
 
@@ -82,12 +141,12 @@ class HelpDialog(QDialog):
         next_button = PrimaryButton("Next", self.show_next_page)  # to show next page
 
         layout.addWidget(self.stacked_widget)
-        layout.addWidget(prev_button)
         layout.addWidget(next_button)
+        layout.addWidget(prev_button)
 
         self.setWindowIcon(QIcon("icons/sad.png"))
 
-    def create_page(self, title, content):
+    def create_page(self, title, image_path, content):
         # Function to create a page with given title and content
         page = QWidget()
 
@@ -98,16 +157,31 @@ class HelpDialog(QDialog):
         title_label.setWordWrap(True)
         title_label.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
 
+        image_label = QLabel(self) # image with 10 px pading and centered
+        pixmap = QPixmap(QtCore.QDir.currentPath() + image_path)
+        image_label.setPixmap(pixmap)
+        image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        image_label.setStyleSheet("QLabel { padding: 10px; }")
+        
         content_label = QLabel(content)  # readable text that is white and word wrapped
         content_label.setFont(QFont("Helvetica", 16))
         content_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         content_label.setStyleSheet("color: white;")
         content_label.setWordWrap(True)
 
+        scroll_area = QScrollArea(page) # Make the content inside the scrollable
+        scroll_area.setWidgetResizable(True)  
+        scroll_widget = QWidget()
+        scroll_layout = QVBoxLayout(scroll_widget)  
+        scroll_layout.addWidget(content_label)  
+        scroll_area.setWidget(scroll_widget)  
+
         layout = QVBoxLayout(page)
         layout.setSpacing(0)
         layout.addWidget(title_label)  # add title and text to page
-        layout.addWidget(content_label)
+        layout.addWidget(image_label)
+        # layout.addWidget(content_label)
+        layout.addWidget(scroll_area)
         return page
 
     def show_next_page(self):
@@ -132,3 +206,10 @@ class HelpDialog(QDialog):
             return QFontDatabase.applicationFontFamilies(font_id)[0]
         else:
             return "Helvetica"  # fallback
+        
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    help_dialog = HelpDialog()
+    help_dialog.setGeometry(2000, 100, 400, 400)
+    help_dialog.show()
+    sys.exit(app.exec())
