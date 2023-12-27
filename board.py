@@ -229,7 +229,7 @@ class Board(QFrame):  # base the board on a QFrame widget
         col = self.x
         print(self.x, self.y, self.move_validity)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        # print(self.x, self.y, self.move_validity)
+        pieceColor = QColor(0,0,0,0)
         if self.move_validity is None or (self.x is None and self.y is None):
             pass
         elif self.move_validity:
@@ -252,7 +252,6 @@ class Board(QFrame):  # base the board on a QFrame widget
                 self.animation_radius,
                 self.animation_radius,
             )
-            # print("Animate pieces ", row, col)
 
         else:
             # invalid move - red flash
@@ -290,7 +289,7 @@ class Board(QFrame):  # base the board on a QFrame widget
 
     def capturedAnimation(self, painter, captured_group):
         for i in captured_group:
-            if i[2] == 1:
+            if i[2] == 1: # check the type of peices and set the brushColor
                 color = QColor(0, 0, 0, int(self.group_opacity * 255))
             else:
                 color = QColor(255, 255, 255, int(self.group_opacity * 255))
@@ -307,7 +306,7 @@ class Board(QFrame):  # base the board on a QFrame widget
 
     def update_captured_animation(self):
         if not self.group_animation_finished:
-            self.group_opacity -= 0.05  # Decrease opacity (change this value as needed)
+            self.group_opacity -= 0.05  # Decrease opacity 
             if self.group_opacity <= 0:
                 self.group_animation_finished = True
                 self.move_validity = None
