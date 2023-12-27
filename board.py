@@ -21,6 +21,7 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.setFixedWidth(640)
         self.setFixedHeight(640)
 
+        # Timer for valid and invalid move Animation
         self.animation_timer = QTimer(self)
         self.animation_timer.timeout.connect(self.updateAnimation)
         self.animation_radius = int((self.squareWidth() - 2) / 2.2) + 10
@@ -29,6 +30,8 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.opacity = 1
         self.animation_radius = int((self.squareWidth() - 2) / 2.2)
 
+        # Timer for captured pieces animation
+        self.captured_pieces = []
         self.group_animation_timer = QTimer(self)
         self.group_animation_timer.timeout.connect(self.update_captured_animation)
         self.group_opacity = 1
@@ -75,7 +78,8 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.drawBoardSquares(painter)
         self.drawPieces(painter)
         self.animatePieces(painter)
-        # self.capturedAnimation(painter, [[2,2,2], [2,3,2], [3,2,2],[3,3,2]])
+        
+        self.capturedAnimation(painter, self.captured_pieces)
         # GameLogic
         # self.animatePieces(painter)
 
@@ -93,18 +97,28 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.x = row
         self.y = col
 
-        # timer for animation
+        # reset timer for pieces animation
         if self.animation_timer.isActive():
             self.animation_timer.stop()
         self.animation_timer = QTimer(self)
         self.animation_timer.timeout.connect(self.updateAnimation)
         if self.move_validity:  # valid move animation
             self.animation_radius = int((self.squareWidth() - 2) / 2.2) + 10
+            if self.captured_pieces != [] and self.group_opacity < 1:
+                self.group_animation_timer = QTimer(self)
+                self.group_animation_timer.timeout.connect(self.update_captured_animation)
+                self.group_opacity = 1
+                self.group_animation_finished = False
+                self.group_animation_timer.start(30)
         else:  # invalid move animation
             self.animation_radius = int((self.squareWidth() - 2) / 2.2)
             self.opacity = 1
         self.animation_finished = False
         self.animation_timer.start(30)
+
+        
+
+
         self.update()
 
     def drawBoardSquares(self, painter):
@@ -266,7 +280,6 @@ class Board(QFrame):  # base the board on a QFrame widget
                 self.opacity -= 0.05  # Decrease opacity (change this value as needed)
                 self.update()
             if self.opacity <= 0:
-                print(self.x, self.y, self.move_validity)
                 self.animation_finished = True
                 self.move_validity = None
                 self.animation_timer.stop()
@@ -275,26 +288,29 @@ class Board(QFrame):  # base the board on a QFrame widget
 
     def capturedAnimation(self, painter, captured_group):
         color = QColor(0, 0, 0, 0)
-        for i in captured_group:
-            if i[2] == 1:  # check the type of peices and set the brushColor
-                color = QColor(0, 0, 0, int(self.group_opacity * 255))
-            else:
-                color = QColor(255, 255, 255, int(self.group_opacity * 255))
+        if captured_group is None:
+            pass
+        else:
+            for i in captured_group:
+                if i[2] == 1:  # check the type of peices and set the brushColor
+                    color = QColor(0, 0, 0, int(self.group_opacity * 255))
+                else:
+                    color = QColor(255, 255, 255, int(self.group_opacity * 255))
 
-            painter.setBrush(color)
-            painter.drawEllipse(
-                QPoint(
-                    (i[0] + 1) * int(self.squareWidth()),
-                    (i[1] + 1) * int(self.squareHeight()),
-                ),
-                self.animation_radius,
-                self.animation_radius,
-            )
+                painter.setBrush(color)
+                painter.drawEllipse(
+                    QPoint(
+                        (i[1] + 1) * int(self.squareWidth()),
+                        (i[0] + 1) * int(self.squareHeight()),
+                    ),
+                    self.animation_radius,
+                    self.animation_radius,
+                )
 
     def update_captured_animation(self):
         if not self.group_animation_finished:
             self.group_opacity -= 0.05  # Decrease opacity
-            if self.group_opacity <= 0:
+            if self.group_opacity == 0:
                 self.group_animation_finished = True
                 self.move_validity = None
                 self.group_animation_timer.stop()
