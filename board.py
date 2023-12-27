@@ -120,6 +120,8 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.y = col
 
         # timer for animation
+        if self.animation_timer.isActive():
+            self.animation_timer.stop()
         self.animation_timer = QTimer(self)
         self.animation_timer.timeout.connect(self.updateAnimation)
         if self.move_validity:  # valid move animation
@@ -292,6 +294,7 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.update()
 
     def capturedAnimation(self, painter, captured_group):
+        color = QColor(0, 0, 0, 0)
         for i in captured_group:
             if i[2] == 1: # check the type of peices and set the brushColor
                 color = QColor(0, 0, 0, int(self.group_opacity * 255))
