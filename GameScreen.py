@@ -20,7 +20,7 @@ from game_logic import GameLogic
 from GameEndDialogue import GameEndDialog
 from IconButton import IconButton
 from PauseDialog import PauseDialog
-
+from HelpDialog import HelpDialog
 # from DrawingArea import DrawingArea
 # from HelpDialog import HelpDialog
 # from AboutDialog import AboutDialog
@@ -214,7 +214,7 @@ class GameScreen(QMainWindow):
         help = QAction("Instructions", self)
         help.setShortcut("I")
         help_menu.addAction(help)
-        help.triggered.connect(self.do_nothing)
+        help.triggered.connect(self.instruction_widget)
 
         # about the game short cut
         about = QAction("About", self)
@@ -324,6 +324,10 @@ class GameScreen(QMainWindow):
         pause_dialog = PauseDialog()
         pause_dialog.exec()
         GameLogic.current_player["timer"].start()
+
+    def instruction_widget(self):
+        help_dialog = HelpDialog()
+        help_dialog.exec()
 
     def do_nothing(self):
         print("doing nothing ")
