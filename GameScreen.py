@@ -29,17 +29,21 @@ class GameScreen(QMainWindow):
     def __init__(self, p1Name, p2Name, is_speed_go, is_handicap, back_to_start_signal):
         super().__init__()
         self.board = Board(self.try_move)
-        self.back_to_start_signal = back_to_start_signal
-        self.is_game_running = True
-        self.is_game_started = False
-        self.game_logic = GameLogic(p1Name, p2Name)
-        self.is_speed_go = is_speed_go
+        self.back_to_start_signal = (
+            back_to_start_signal  # signal that when emitted goes back to start screen
+        )
+        self.game_logic = GameLogic(
+            p1Name, p2Name
+        )  # create an instanc eof the game logic class while passing in the player names
+        self.is_speed_go = is_speed_go  # speed go mode
         self.is_handicap = is_handicap
-        self.handicap_count = 2 if is_handicap else 0
 
-        self.passed = False
+        self.passed = False  # variable to check for 2 passes
 
-        self.help_dialog = HelpDialog(self)
+        self.help_dialog = HelpDialog(
+            self
+        )  # create a help dialog  but dont show it yet
+
         # set window appearance
         self.setWindowTitle("Go")
         self.setStyleSheet(
@@ -59,9 +63,11 @@ class GameScreen(QMainWindow):
             }
         """
         )
+
         self.setMinimumWidth(1150)
         self.setMinimumHeight(750)
 
+        # play are that include both the baord and the button dock
         self.play_area = QWidget()
         play_area_layout = QVBoxLayout()
         play_area_layout.setContentsMargins(0, 20, 0, 0)
@@ -79,12 +85,16 @@ class GameScreen(QMainWindow):
         self.undo_button = IconButton(
             undo_icon,
             self.undo_board,
-            ("Disabled in Speed Go" if is_speed_go else "Undo Move"),
+            (
+                "Disabled in Speed Go" if is_speed_go else "Undo Move"
+            ),  # make it disabled in speed go mode
         )
         self.redo_button = IconButton(
             redo_icon,
             self.redo_board,
-            ("Disabled in Speed Go" if is_speed_go else "Redo Move"),
+            (
+                "Disabled in Speed Go" if is_speed_go else "Redo Move"
+            ),  # make it diabled in speed go mode
         )
         self.undo_button.setDisabled(True)
         self.redo_button.setDisabled(True)
@@ -103,12 +113,14 @@ class GameScreen(QMainWindow):
         button_dock_layout.addSpacerItem(spacer)
         button_dock_layout.addWidget(pass_button)
         button_dock_layout.addWidget(resign_button)
-        if not self.is_speed_go:
+        if not self.is_speed_go:  # add reset button if not in speed go
             button_dock_layout.addWidget(reset_button)
             del pause_button
-        else:
+        else:  # if in speed go mode
             del reset_button
-            button_dock_layout.addWidget(pause_button)
+            button_dock_layout.addWidget(
+                pause_button
+            )  # add the pause button to stop the timers
         button_dock_layout.addStretch()
 
         center_board = QHBoxLayout()
@@ -121,7 +133,7 @@ class GameScreen(QMainWindow):
         play_area_layout.addWidget(button_dock)
 
         # create a Side bar into which the player info is passed (so it can create dialogs using that info which is readily available)
-        self.p1_side = SideBar(
+        self.p1_side = SideBar(  # side bar for player 1 info
             GameLogic.player1,
             has_kumi=False,
             starts_first=not is_handicap,
@@ -129,7 +141,7 @@ class GameScreen(QMainWindow):
             resign_callback=self.resign_from_game,
         )
 
-        self.p2_side = SideBar(
+        self.p2_side = SideBar(  # side bar for player 2 info
             GameLogic.player2,
             has_kumi=True,
             starts_first=is_handicap,
@@ -152,47 +164,41 @@ class GameScreen(QMainWindow):
         # create a menu bar
         mainMenu = self.menuBar()
         mainMenu.setNativeMenuBar(False)
-        game_menu = mainMenu.addMenu(
-            "Game"
-        )  # add the "Brush Size" menu to the menu bar
+
+        # 3 menu buttons game, move, and help
+        game_menu = mainMenu.addMenu("Game")
         move_menu = mainMenu.addMenu("Move")
         help_menu = mainMenu.addMenu("Help")
 
-        # clear
+        # pause action
         pause_action = QAction("Pause", self)
-        pause_action.setShortcut("Space")
+        pause_action.setShortcut("Space")  # set keyboard shortcut
         game_menu.addAction(pause_action)
         if not is_speed_go:
             pause_action.setEnabled(False)
         pause_action.triggered.connect(self.pause_game)
-        #  # when the menu option is selected or the shortcut is used the clear slot is triggered
 
-        # save menu item
-        pass_action = QAction(
-            "Pass", self
-        )  # create a save action with a png as an icon
-        pass_action.setShortcut(
-            "Ctrl+P"
-        )  # connect this save action to a keyboard shortcut,
+        # pass player turn
+        pass_action = QAction("Pass", self)
+        pass_action.setShortcut("Ctrl+P")  # set keyboard shortcut
         game_menu.addAction(pass_action)
         pass_action.triggered.connect(self.check_passes)
 
-        # exit short cut
+        # resign from the game
         resign_action = QAction("Resign", self)
         resign_action.setShortcut("Ctrl+X")
         resign_action.triggered.connect(self.resign_from_game)
         game_menu.addAction(resign_action)
 
-        # clear
+        # reset the board
         reset_action = QAction("Reset", self)
         reset_action.setShortcut("Ctrl+R")
         game_menu.addAction(reset_action)
         if is_speed_go:
             reset_action.setEnabled(False)
         reset_action.triggered.connect(self.reset_game)
-        #  # when the menu option is selected or the shortcut is used the clear slot is triggered
 
-        # exit short cut
+        # undo last move
         undo_action = QAction("Undo", self)
         undo_action.setShortcut("U")
         undo_action.triggered.connect(self.undo_board)
@@ -200,7 +206,7 @@ class GameScreen(QMainWindow):
             undo_action.setEnabled(False)
         move_menu.addAction(undo_action)
 
-        # exit short cut
+        # redo the last move that was undone
         redo_action = QAction("Redo", self)
         redo_action.setShortcut("R")
         redo_action.triggered.connect(self.redo_board)
@@ -208,7 +214,7 @@ class GameScreen(QMainWindow):
             redo_action.setEnabled(False)
         move_menu.addAction(redo_action)
 
-        # help section shortcut
+        # game rules section shortcut
         help = QAction("Instructions", self)
         help.setShortcut("I")
         help_menu.addAction(help)
@@ -220,32 +226,39 @@ class GameScreen(QMainWindow):
         help_menu.addAction(about)
         about.triggered.connect(self.open_about_dialog)
 
-    def start_game(self):
-        self.switch_timers()
-
-    def try_move(self, y, x):
+    def try_move(
+        self, y, x
+    ):  # checks if the proposed move is possible and is not a suicide or KO or invalid move
         try:
-            type = 1 if GameLogic.current_player is GameLogic.player1 else 2
+            type = (
+                1 if GameLogic.current_player is GameLogic.player1 else 2
+            )  # which colour piece to place
             return GameLogic.try_move(type, y, x)
         finally:
-            self.p1_side.update_score()
+            self.p1_side.update_score()  # after every move update the scores
             self.p2_side.update_score()
-            self.switch_timers()
-            self.passed = False
-            if not self.is_speed_go:
+            self.switch_timers()  # switch the timers if turn has been switched
+            self.passed = False  # reset the passed variable
+            if (
+                not self.is_speed_go
+            ):  # if not speed go then disable or enable the undo redo buttons depending on wether states are available
                 self.undo_button.setDisabled(not GameLogic.undo_is_possible())
                 self.redo_button.setDisabled(not GameLogic.redo_is_possible())
 
-    def check_passes(self):
+    def check_passes(
+        self,
+    ):  # checks is one pass has already been made and if yes then ends game
         print(self.passed)
         if self.passed:
             self.end_game()
         else:
-            GameLogic.flip_turn()
+            GameLogic.flip_turn()  # changes the current player
             self.passed = True
-            self.switch_timers()
+            self.switch_timers()  # switch the timers
 
-    def reset_game(self):
+    def reset_game(
+        self,
+    ):  # resets the logical board and score and also updates the UI to go into the default state
         print("baord being reset")
         self.game_logic.reset_board()
         GameLogic.player1["score"] = [0, 0]
@@ -264,7 +277,8 @@ class GameScreen(QMainWindow):
         self.redraw_board()
 
     def undo_board(self):
-        if GameLogic.undo_board():
+        if GameLogic.undo_board():  # undo the move logically
+            # update the UI to reflect that change
             self.switch_timers()
             self.redraw_board()
             self.p1_side.update_score()
@@ -272,7 +286,8 @@ class GameScreen(QMainWindow):
             self.redo_button.setDisabled(False)
             self.undo_button.setDisabled(not GameLogic.undo_is_possible())
 
-    def redo_board(self):
+    def redo_board(self):  # redo the move logically
+        # update the UI to reflexxt the change
         if GameLogic.redo_board():
             self.switch_timers()
             self.redraw_board()
@@ -281,53 +296,61 @@ class GameScreen(QMainWindow):
             self.undo_button.setDisabled(False)
             self.redo_button.setDisabled(not GameLogic.redo_is_possible())
 
-    def resign_from_game(self):
-        dialog = ResignDialog(self.reset_game, self.back_to_start_signal)
+    def resign_from_game(self):  # the player who calls this function loses immediately
+        dialog = ResignDialog(
+            self.reset_game, self.back_to_start_signal
+        )  # we show the resign dialog
         dialog.exec()
         self.help_dialog.close()
-        print(GameLogic.current_player["name"], "has resigned")
-        pass
 
-    def redraw_board(self):
+    def redraw_board(self):  # redraws the board after updates to the logical board
         self.board.update()
 
     def end_game(self):
-        # call the game end dialogue and edit it so that it calculated the scores and displays it tot he suer. you might have to change the colours as well.
-        self.is_game_running = False
+        # stop the timers and the animation of the labels
         GameLogic.player1["timer"].stop()
         GameLogic.player2["timer"].stop()
         self.p1_side.stop_turn_animation()
         self.p2_side.stop_turn_animation()
+
         end_dialog = GameEndDialog(
             self.reset_game, self.back_to_start_signal
-        )  # show the confirm quit dialog
+        )  # show the game end dialog that shows the scores and allows player to start a new game or a rematch
         self.help_dialog.close()
         end_dialog.exec()
 
-    def switch_timers(self):
+    def switch_timers(
+        self,
+    ):  # start a timer and stops the other one based on which player is the current player and it also switches which turn_label is animated
         if GameLogic.current_player == GameLogic.player1:
             if self.is_speed_go:
-                GameLogic.player1["timer"].start()  # stop the timer for player 1
+                GameLogic.player1[
+                    "timer"
+                ].start()  # start the timer and animation for player 1
                 GameLogic.player2["timer"].stop()
             self.p1_side.start_turn_animation()
             self.p2_side.stop_turn_animation()
 
         else:
             if self.is_speed_go:
-                GameLogic.player2["timer"].start()  # stop the timer for player 1
+                GameLogic.player2[
+                    "timer"
+                ].start()  # start the timer and animation  for player 2
                 GameLogic.player1["timer"].stop()
             self.p2_side.start_turn_animation()
             self.p1_side.stop_turn_animation()
 
     def pause_game(self):
-        GameLogic.player2["timer"].stop()  # stop the timer for player 1
+        GameLogic.player2["timer"].stop()  # stop both timers
         GameLogic.player1["timer"].stop()
-        pause_dialog = PauseDialog()
+        pause_dialog = PauseDialog()  # show a pause dialog
         pause_dialog.exec()
-        GameLogic.current_player["timer"].start()
+        GameLogic.current_player[
+            "timer"
+        ].start()  # afte the dialog is executed we continue with the timer
 
     def instruction_widget(self):
-        self.help_dialog.show()
+        self.help_dialog.show()  # show the game rules widget
 
     def open_about_dialog(self):
         dialog = AboutDialog()

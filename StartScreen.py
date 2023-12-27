@@ -8,20 +8,16 @@ from PyQt6.QtWidgets import (
     QCheckBox,
 )
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QFont, QFontDatabase
+from PyQt6 import QtCore
 from PrimaryButton import PrimaryButton
 from SecondaryButton import SecondaryButton
-from PyQt6 import QtCore
-from PyQt6 import QtCore
-from PyQt6.QtGui import QFontDatabase
 from QuitDialog import QuitDialog
 from GameScreen import GameScreen
-from styles import colors
 from PyQt6.QtGui import QAction
 from HelpDialog import HelpDialog
 from AboutDialog import AboutDialog
-
-# from QuitDialog import QuitDialog
+from styles import colors
 
 
 class StartScreen(QMainWindow):
@@ -69,7 +65,6 @@ class StartScreen(QMainWindow):
         logo_font = QFont(get_tan_nimbus(), 70)
         main_logo_label.setFont(logo_font)
         main_logo_label.setStyleSheet(f"color:{colors['yellow']}")
-        # main_logo_label.setFixedHeight(70)
 
         main_logo_subtext = QLabel("The 2 player strategy game")
         main_logo_subtext.setAlignment(Qt.AlignmentFlag.AlignCenter)

@@ -55,7 +55,7 @@ class ResignDialog(QDialog):
 
     def rematch(
         self,
-    ):  # call the rematch  callback which called the function in the sidebar component
+    ):  # call the rematch  callback which called the function iin the game screen component
         self.rematch_callback()
         self.close()
 
@@ -64,20 +64,9 @@ class ResignDialog(QDialog):
     ):  # calls afunction that emits our custom signal which shows the strt screen again so different players can start a new game
         self.close()
         self.start_screen_callback.emit()
-        # self.start_screen_callback.emit()
 
     def get_statliches(self):  # to get the font from the file
         font_path = QtCore.QDir.currentPath() + "/fonts/statliches.ttf"
-        font_id = QFontDatabase.addApplicationFont(font_path)
-        # Check if the font was loaded successfully
-        if font_id != -1:
-            return QFontDatabase.applicationFontFamilies(font_id)[0]
-        else:
-            print("font not found ")
-            return "Helvetica"
-
-    def get_josefin(self):  # to get the font from the file
-        font_path = QtCore.QDir.currentPath() + "/fonts/josefin.ttf"
         font_id = QFontDatabase.addApplicationFont(font_path)
         # Check if the font was loaded successfully
         if font_id != -1:

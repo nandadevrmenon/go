@@ -1,11 +1,13 @@
 from PyQt6.QtWidgets import QPushButton, QWidget
 
 
+# Define a custom QPushButton class called PrimaryButton
 class PrimaryButton(QPushButton):
     def __init__(self, text, on_click_handler):
+        # Call the constructor of the parent class (QPushButton)
         super().__init__(text)
 
-        # Set default styles
+        # Set default styles for the button using CSS-like styling
         self.setStyleSheet(
             """
             QPushButton {
@@ -26,6 +28,7 @@ class PrimaryButton(QPushButton):
         """
         )
 
+        # Connect the button's clicked signal to the provided on_click_handler function
         self.clicked.connect(
             on_click_handler
         )  # passes the callback into the native clicked event handler

@@ -25,6 +25,7 @@ class AboutDialog(QDialog):
         title_label.setStyleSheet("color: white;")
         title_label.setWordWrap(True)
 
+        # dev names
         nandadev = QLabel("Nandadev Rajeev Menon")
         nandadev.setFont(QFont("Helvetica", 14))
         nandadev.setAlignment(Qt.AlignmentFlag.AlignCenter)
