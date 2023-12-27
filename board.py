@@ -100,7 +100,7 @@ class Board(QFrame):  # base the board on a QFrame widget
         self.drawBoardSquares(painter)
         self.drawPieces(painter)
         self.animatePieces(painter)
-        self.capturedAnimation(painter, [[2,2,2], [2,3,2], [3,2,2],[3,3,2]])
+        # self.capturedAnimation(painter, [[2,2,2], [2,3,2], [3,2,2],[3,3,2]])
         # GameLogic
         # self.animatePieces(painter)
 

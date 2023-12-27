@@ -24,7 +24,7 @@ import sys
 
 
 class SideBar(QWidget):
-    def __init__(self, player, has_kumi, starts_first=False):
+    def __init__(self, player, has_kumi, starts_first=False, is_speed_go=False):
         super().__init__()
 
         # main components settings
@@ -42,8 +42,8 @@ class SideBar(QWidget):
         statliches_heading1 = QFont(statliches, 35)  # minimalist display font
         statliches_heading2 = QFont(statliches, 25)
         statliches_heading3 = QFont(statliches, 20)
-        statliches_heading4 = QFont(statliches, 18)
-        statliches_body = QFont(statliches, 16)
+        # statliches_heading4 = QFont(statliches, 18)
+        # statliches_body = QFont(statliches, 16)
         font_color_white = f"color:{colors['white']}"
         align_left = Qt.AlignmentFlag.AlignLeft
         align_right = Qt.AlignmentFlag.AlignRight
@@ -55,15 +55,17 @@ class SideBar(QWidget):
         self.kumi = 7.5 if self.has_kumi else 0
         self.starts_first = starts_first
         self.player_name = str(player["name"]).upper()
+        self.is_speed_go = is_speed_go
         territory = player["score"][0]
         captured = player["score"][1]
 
-        self.timer = player["timer"]  # to time the rounds
-        self.timer_counter = 120
-        self.timer.setInterval(1000)
-        self.timer.timeout.connect(
-            self.update_timer
-        )  # after every 1 second(which is the timeout for this one) we update the timer label
+        if self.is_speed_go:
+            self.timer = player["timer"]  # to time the rounds
+            self.timer_counter = 120
+            self.timer.setInterval(1000)
+            self.timer.timeout.connect(
+                self.update_timer
+            )  # after every 1 second(which is the timeout for this one) we update the timer label
 
         player_box = QWidget()
 
@@ -112,8 +114,9 @@ class SideBar(QWidget):
         player_box_grid.addWidget(self.turn_label, 0, 0, 1, 2)
         player_box_grid.addWidget(self.player_label, 1, 0, 1, 1)
         player_box_grid.addWidget(color_label, 1, 1, 1, 1)
-        player_box_grid.addWidget(self.timer_label, 2, 0, 1, 2)
-        player_box.setMinimumHeight(120)
+        if self.is_speed_go:
+            player_box_grid.addWidget(self.timer_label, 2, 0, 1, 2)
+        player_box.setMinimumHeight(120 if self.is_speed_go else 80)
 
         # the box with the scores
         score_box = QWidget()
@@ -210,6 +213,7 @@ class SideBar(QWidget):
         if self.timer_counter < 0:
             # Stop the timer when the countdown reaches 0
             self.timer.stop()
+            self.parentWidget().resign_from_game()
             return
 
         # Convert remaining seconds to minutes and seconds

@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import (
     QLineEdit,
     QGridLayout,
     QVBoxLayout,
+    QCheckBox,
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
@@ -35,7 +36,7 @@ class StartScreen(QMainWindow):
         self.setCentralWidget(central_widget)
         main_grid_layout = QGridLayout(central_widget)
         main_grid_layout.setContentsMargins(40, 40, 40, 40)
-        self.setFixedHeight(350)
+        self.setFixedHeight(400)
         self.setFixedWidth(350)
 
         # Logo
@@ -81,6 +82,18 @@ class StartScreen(QMainWindow):
             f"background-color: {colors['lighter black']}; color: #ffffff;"
         )
 
+        handicap_label = QLabel("Handicap:")
+        handicap_label.setStyleSheet(f"color: {colors['white']}")
+
+        self.handicap_checkbox = QCheckBox("(2 pieces)")
+        self.handicap_checkbox.setStyleSheet(f"color: {colors['white']}")
+
+        speed_go_label = QLabel("Speed Go:")
+        speed_go_label.setStyleSheet(f"color: {colors['white']}")
+
+        self.speed_go_checkbox = QCheckBox()
+        self.speed_go_checkbox.setStyleSheet(f"color: {colors['white']}")
+
         # two primary buttons one to start game and the other to quit
         submit_button = PrimaryButton("Start Game", self.show_game_screen)
         quit_button = SecondaryButton("Quit Game", self.show_quit_confirmation)
@@ -91,12 +104,18 @@ class StartScreen(QMainWindow):
         main_grid_layout.addWidget(self.player1_name, 6, 1, 1, 4)
         main_grid_layout.addWidget(player2_label, 7, 0, 1, 1)
         main_grid_layout.addWidget(self.player2_name, 7, 1, 1, 4)
-        main_grid_layout.addWidget(submit_button, 8, 0, 1, 5)
-        main_grid_layout.addWidget(quit_button, 9, 0, 1, 5)
+        main_grid_layout.addWidget(handicap_label, 8, 0, 1, 1)
+        main_grid_layout.addWidget(self.handicap_checkbox, 8, 1, 1, 4)
+        main_grid_layout.addWidget(speed_go_label, 9, 0, 1, 1)
+        main_grid_layout.addWidget(self.speed_go_checkbox, 9, 1, 1, 4)
+        main_grid_layout.addWidget(submit_button, 10, 0, 1, 5)
+        main_grid_layout.addWidget(quit_button, 11, 0, 1, 5)
 
     def show_game_screen(self):
         player1 = self.player1_name.text()  # get the names of the two players
         player2 = self.player2_name.text()
+        is_handicap = self.handicap_checkbox.isChecked()
+        is_speed_go = self.speed_go_checkbox.isChecked()
 
         # validate the names and produce an error message
         player1_valid, error_msg1 = self.validate_player_name(player1)
@@ -104,7 +123,7 @@ class StartScreen(QMainWindow):
 
         if player1_valid and player2_valid:
             self.game_screen = GameScreen(
-                player1, player2
+                player1, player2, is_speed_go, is_handicap
             )  # we create a new game screen with the player names and the mode
             self.game_screen.back_to_start_signal.connect(
                 self.show_start_screen

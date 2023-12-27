@@ -8,6 +8,7 @@ from PyQt6.QtGui import QIcon, QFont
 from SecondaryButton import SecondaryButton
 from PrimaryButton import PrimaryButton
 from PyQt6.QtCore import Qt
+from styles import colors
 
 
 class QuitDialog(QDialog):
@@ -16,7 +17,7 @@ class QuitDialog(QDialog):
     ):
         super().__init__()
         self.setWindowTitle("Confirmation")
-        self.setStyleSheet("background-color: #070114;")
+        self.setStyleSheet(f"background-color: {colors['light black']};")
 
         layout = QGridLayout(self)
 

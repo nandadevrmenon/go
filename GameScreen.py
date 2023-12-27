@@ -1,4 +1,12 @@
-from PyQt6.QtWidgets import QWidget, QMainWindow, QApplication, QHBoxLayout, QVBoxLayout
+from PyQt6.QtWidgets import (
+    QWidget,
+    QMainWindow,
+    QSpacerItem,
+    QApplication,
+    QHBoxLayout,
+    QSizePolicy,
+    QVBoxLayout,
+)
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QAction, QIcon
 
@@ -29,36 +37,6 @@ class GameScreen(QMainWindow):
         self.game_logic = GameLogic(p1Name, p2Name)
         self.is_speed_go = is_speed_go
         self.is_handicap = is_handicap
-        
-        board, groups = GameLogic.make_board_from_state(
-            [
-                [0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 1, 1, 0, 0, 0],
-                [0, 1, 0, 0, 1, 0, 0],
-                [0, 1, 0, 0, 1, 0, 0],
-                [0, 0, 1, 1, 0, 2, 2],
-                [0, 0, 0, 0, 2, 0, 1],
-                [0, 0, 0, 0, 0, 2, 1],
-            ]
-        )
-
-     
-
-        # board, groups = GameLogic.make_board_from_state(
-        #     [
-        #         [0, 0, 0, 0, 0, 0, 0],
-        #         [0, 0, 0, 0, 0, 0, 0],
-        #         [0, 0, 0, 0, 0, 0, 0],
-        #         [0, 0, 0, 0, 0, 0, 0],
-        #         [0, 0, 0, 0, 0, 0, 0],
-        #         [0, 0, 0, 0, 0, 0, 0],
-        #         [0, 0, 0, 0, 0, 0, 0],
-        #     ]
-        # )
-
-        GameLogic.board = board
-        GameLogic.all_groups = groups
-        GameLogic.record_board_state()
 
         self.passed = False
 
@@ -82,7 +60,7 @@ class GameScreen(QMainWindow):
         """
         )
         self.setMinimumWidth(1150)
-        self.setMinimumHeight(700)
+        self.setMinimumHeight(750)
 
         self.play_area = QWidget()
         play_area_layout = QVBoxLayout()
@@ -102,12 +80,19 @@ class GameScreen(QMainWindow):
         pause_button = PrimaryButton("Pause", do_nothing)
         reset_button = PrimaryButton("Reset", self.reset_game)
 
+        spacer = QSpacerItem(
+            40, 10, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
+        )
+
+        button_dock_layout.addStretch()
         button_dock_layout.addWidget(undo_button)
         button_dock_layout.addWidget(redo_button)
+        button_dock_layout.addSpacerItem(spacer)
         button_dock_layout.addWidget(pass_button)
         button_dock_layout.addWidget(resign_button)
         button_dock_layout.addWidget(pause_button)
         button_dock_layout.addWidget(reset_button)
+        button_dock_layout.addStretch()
 
         center_board = QHBoxLayout()
 
@@ -120,11 +105,17 @@ class GameScreen(QMainWindow):
 
         # create a Side bar into which the player info is passed (so it can create dialogs using that info which is readily available)
         self.p1_side = SideBar(
-            GameLogic.player1, has_kumi=False, starts_first=not is_handicap
+            GameLogic.player1,
+            has_kumi=False,
+            starts_first=not is_handicap,
+            is_speed_go=self.is_speed_go,
         )
 
         self.p2_side = SideBar(
-            GameLogic.player2, has_kumi=True, starts_first=is_handicap
+            GameLogic.player2,
+            has_kumi=True,
+            starts_first=is_handicap,
+            is_speed_go=self.is_speed_go,
         )
 
         # define and adjust main layout
@@ -158,8 +149,9 @@ class GameScreen(QMainWindow):
 
         self.p1_side.update_score()
         self.p2_side.update_score()
-        self.p1_side.reset_timer()
-        self.p2_side.reset_timer()
+        if self.is_speed_go:
+            self.p1_side.reset_timer()
+            self.p2_side.reset_timer()
         self.p1_side.default_turn_animation()
         self.p2_side.default_turn_animation()
 
@@ -177,6 +169,7 @@ class GameScreen(QMainWindow):
 
     def resign_from_game(self):
         # show which plyer lost in the Reisgn dialog and thats the end of it .
+        print(GameLogic.current_player["name"], "has resigned")
         pass
 
     def try_move(self, y, x):
@@ -208,14 +201,16 @@ class GameScreen(QMainWindow):
 
     def switch_timers(self):
         if GameLogic.current_player == GameLogic.player1:
-            GameLogic.player1["timer"].start()  # stop the timer for player 1
-            GameLogic.player2["timer"].stop()
+            if self.is_speed_go:
+                GameLogic.player1["timer"].start()  # stop the timer for player 1
+                GameLogic.player2["timer"].stop()
             self.p1_side.start_turn_animation()
             self.p2_side.stop_turn_animation()
 
         else:
-            GameLogic.player2["timer"].start()  # stop the timer for player 1
-            GameLogic.player1["timer"].stop()
+            if self.is_speed_go:
+                GameLogic.player2["timer"].start()  # stop the timer for player 1
+                GameLogic.player1["timer"].stop()
             self.p2_side.start_turn_animation()
             self.p1_side.stop_turn_animation()
 
@@ -227,7 +222,7 @@ def do_nothing():
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = GameScreen(
-        "bruh", "hello", True, False
+        "bruh", "hello", False, False
     )  # open the start screen of the game
     window.show()
     app.exec()  # start the event loop running
