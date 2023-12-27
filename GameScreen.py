@@ -332,7 +332,7 @@ class GameScreen(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = GameScreen(
-        "bruh", "hello", True, False
+        "bruh", "hello", False, False
     )  # open the start screen of the game
     window.show()
     app.exec()  # start the event loop running
