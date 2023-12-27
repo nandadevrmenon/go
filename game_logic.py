@@ -41,7 +41,7 @@ class GameLogic:
         board = GameLogic.board
         piece = board[y][x]
         if piece.type != 0:  # already a piece there
-            return None
+            return None, None
         if piece.liberties == 0:  # if piece is surrounded
             piece.place(type)
             piece.decrement_neighbour_liberties()
@@ -49,35 +49,38 @@ class GameLogic:
             state = GameLogic.get_board_state(GameLogic.board)
             sample_board, sample_board_groups = GameLogic.make_board_from_state(state)
             added_piece = sample_board[y][x]
-
+            captured_pieces = []
             if GameLogic.check_suicide_for(added_piece):
                 print("suicide found ")
-                if GameLogic.check_captures_near(added_piece):
+                if (
+                    len(captured_pieces := GameLogic.get_captured_pieces(added_piece))
+                    > 0
+                ):
                     if GameLogic.check_for_KO(sample_board):
                         piece.increment_neighbour_liberties()
                         piece.remove()
                         GameLogic.temp_captured = 0
-                        return False
+                        return False, None
                     GameLogic.board = sample_board
                     GameLogic.all_groups = sample_board_groups
                     GameLogic.update_board_scores_turn()
-                    return True
+                    return True, captured_pieces
                 piece.increment_neighbour_liberties()
                 piece.remove()
-                return False
+                return False, None
             else:
-                GameLogic.check_captures_near(added_piece)
+                captured_pieces = GameLogic.get_captured_pieces(added_piece)
                 GameLogic.board = sample_board
                 GameLogic.all_groups = sample_board_groups
                 GameLogic.update_board_scores_turn()
-                return True
+                return True, captured_pieces
         else:
             piece.place(type)
             piece.decrement_neighbour_liberties()
             piece.add_to_group()
-            GameLogic.check_captures_near(piece)
+            captured_pieces = GameLogic.get_captured_pieces(piece)
             GameLogic.update_board_scores_turn()
-            return True
+            return True, captured_pieces
 
     def update_board_scores_turn():
         GameLogic.update_player_scores()
@@ -103,20 +106,20 @@ class GameLogic:
         return False
 
     @staticmethod
-    def check_captures_near(piece):
+    def get_captured_pieces(piece):
         neighbours = piece.get_neighbours()
         groups = [piece.group for piece in neighbours if piece.group is not None]
-        captured = False
+        captured = []
         for group in groups:
             if (
                 group.stones
                 and group.stones[0].type != piece.type
                 and not (group.check_for_life())
             ):
+                for piece in group.stones:
+                    captured.append((piece.y, piece.x, piece.type))
                 removed = group.remove()
                 GameLogic.temp_captured += removed
-                captured = True
-
         return captured
 
     @staticmethod
