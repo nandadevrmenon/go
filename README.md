@@ -44,5 +44,7 @@ This project is a Go board game developed using Python and PyQt, featuring both 
 3. The game ends upon resignation or two consecutive passes, after which the winner is displayed.
 
 ## Screenshots
-- Start Screen: ![Start Screen](/images/startscreenSS.png)
-- Game Board: ![Game Board](/images/gameplaySS.png)
+- Start Screen
+ ![Start Screen](/images/startscreenSS.png)
+- Game Board:
+  ![Game Board](/images/gameplaySS.png)
