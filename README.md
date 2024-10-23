@@ -28,13 +28,13 @@ This project is a Go board game developed using Python and PyQt, featuring both 
 ## Installation
 
 1. Clone this repository.
-2. Ensure you have `PyQt5` installed.
+2. Ensure you have `PyQt6` installed.
     ```bash
-    pip install pyqt5
+    pip install PyQt6
     ```
 3. Run the game by executing the main Python script:
     ```bash
-    python main.py
+    python __main__.py
     ```
 
 ## Instructions
@@ -45,6 +45,9 @@ This project is a Go board game developed using Python and PyQt, featuring both 
 
 ## Screenshots
 - Start Screen
- ![Start Screen](/images/startscreenSS.png)
+
+![Start Screen](/images/startscreenSS.png)
+
 - Game Board:
+
   ![Game Board](/images/gameplaySS.png)
